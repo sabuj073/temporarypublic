@@ -7,27 +7,25 @@
   $is_image_required = !empty($common_settings['is_product_image_required']) && empty($product->image);
 @endphp
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('product.edit_product')</h1>
-    <!-- <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-        <li class="active">Here</li>
-    </ol> -->
-</section>
-
-<!-- Main content -->
-<section class="content">
+<div class="vp-products-page-wrap">
+<section class="content vp-products-content vp-product-create-content">
 {!! Form::open(['url' => action([\App\Http\Controllers\ProductController::class, 'update'] , [$product->id] ), 'method' => 'PUT', 'id' => 'product_add_form',
         'class' => 'product_form', 'files' => true ]) !!}
     <input type="hidden" id="product_id" value="{{ $product->id }}">
 
-    @component('components.widget', ['class' => 'box-primary'])
-        <div class="row">
+    @component('components.widget', ['class' => 'box-primary vp-product-create-first-card'])
+    <div class="vp-product-create-card-head">
+        <a href="{{ action([\App\Http\Controllers\ProductController::class, 'index']) }}" class="vp-product-create-back" aria-label="@lang('sale.products')">
+            <img src="{{ asset('images/dashboard-icons/sales-back.png') }}" alt="">
+        </a>
+        <h1 class="vp-product-create-card-title">@lang('product.edit_product')</h1>
+    </div>
+
+        <div class="row vp-product-create-grid">
             <div class="col-sm-4">
               <div class="form-group">
                 {!! Form::label('name', __('product.product_name') . ':*') !!}
-                  {!! Form::text('name', $product->name, ['class' => 'form-control', 'required',
+                  {!! Form::text('name', $product->name, ['class' => 'form-control vp-pc-input', 'required',
                   'placeholder' => __('product.product_name')]); !!}
               </div>
             </div>
@@ -35,7 +33,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 {!! Form::label('sku', __('product.sku')  . ':*') !!} @show_tooltip(__('tooltip.sku'))
-                {!! Form::text('sku', $product->sku, ['class' => 'form-control',
+                {!! Form::text('sku', $product->sku, ['class' => 'form-control vp-pc-input',
                 'placeholder' => __('product.sku'), 'required']); !!}
               </div>
             </div>
@@ -43,7 +41,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 {!! Form::label('barcode_type', __('product.barcode_type') . ':*') !!}
-                  {!! Form::select('barcode_type', $barcode_types, $product->barcode_type, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'required']); !!}
+                  {!! Form::select('barcode_type', $barcode_types, $product->barcode_type, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2 vp-pc-select', 'required']); !!}
               </div>
             </div>
 
@@ -52,10 +50,10 @@
             <div class="col-sm-4">
               <div class="form-group">
                 {!! Form::label('unit_id', __('product.unit') . ':*') !!}
-                <div class="input-group">
-                  {!! Form::select('unit_id', $units, $product->unit_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'required']); !!}
+                <div class="input-group vp-pc-input-group">
+                  {!! Form::select('unit_id', $units, $product->unit_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2 vp-pc-select', 'required']); !!}
                   <span class="input-group-btn">
-                    <button type="button" @if(!auth()->user()->can('unit.create')) disabled @endif class="btn btn-default bg-white btn-flat quick_add_unit btn-modal" data-href="{{action([\App\Http\Controllers\UnitController::class, 'create'], ['quick_add' => true])}}" title="@lang('unit.add_unit')" data-container=".view_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+                    <button type="button" @if(!auth()->user()->can('unit.create')) disabled @endif class="btn btn-flat vp-pc-addon-btn quick_add_unit btn-modal" data-href="{{action([\App\Http\Controllers\UnitController::class, 'create'], ['quick_add' => true])}}" title="@lang('unit.add_unit')" data-container=".view_modal"><i class="fa fa-plus"></i></button>
                   </span>
                 </div>
               </div>
@@ -65,7 +63,7 @@
               <div class="form-group">
                 {!! Form::label('sub_unit_ids', __('lang_v1.related_sub_units') . ':') !!} @show_tooltip(__('lang_v1.sub_units_tooltip'))
 
-                <select name="sub_unit_ids[]" class="form-control select2" multiple id="sub_unit_ids">
+                <select name="sub_unit_ids[]" class="form-control select2 vp-pc-select" multiple id="sub_unit_ids">
                   @foreach($sub_units as $sub_unit_id => $sub_unit_value)
                     <option value="{{$sub_unit_id}}" 
                       @if(is_array($product->sub_unit_ids) &&in_array($sub_unit_id, $product->sub_unit_ids))   selected 
@@ -79,7 +77,7 @@
                 <div class="col-sm-4">
                     <div class="form-group">
                         {!! Form::label('secondary_unit_id', __('lang_v1.secondary_unit') . ':') !!} @show_tooltip(__('lang_v1.secondary_unit_help'))
-                        {!! Form::select('secondary_unit_id', $units, $product->secondary_unit_id, ['class' => 'form-control select2']); !!}
+                        {!! Form::select('secondary_unit_id', $units, $product->secondary_unit_id, ['class' => 'form-control select2 vp-pc-select']); !!}
                     </div>
                 </div>
             @endif
@@ -87,10 +85,10 @@
             <div class="col-sm-4 @if(!session('business.enable_brand')) hide @endif">
               <div class="form-group">
                 {!! Form::label('brand_id', __('product.brand') . ':') !!}
-                <div class="input-group">
-                  {!! Form::select('brand_id', $brands, $product->brand_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2']); !!}
+                <div class="input-group vp-pc-input-group">
+                  {!! Form::select('brand_id', $brands, $product->brand_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2 vp-pc-select']); !!}
                   <span class="input-group-btn">
-                    <button type="button" @if(!auth()->user()->can('brand.create')) disabled @endif class="btn btn-default bg-white btn-flat btn-modal" data-href="{{action([\App\Http\Controllers\BrandController::class, 'create'], ['quick_add' => true])}}" title="@lang('brand.add_brand')" data-container=".view_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+                    <button type="button" @if(!auth()->user()->can('brand.create')) disabled @endif class="btn btn-flat vp-pc-addon-btn btn-modal" data-href="{{action([\App\Http\Controllers\BrandController::class, 'create'], ['quick_add' => true])}}" title="@lang('brand.add_brand')" data-container=".view_modal"><i class="fa fa-plus"></i></button>
                   </span>
                 </div>
               </div>
@@ -98,21 +96,21 @@
             <div class="col-sm-4 @if(!session('business.enable_category')) hide @endif">
               <div class="form-group">
                 {!! Form::label('category_id', __('product.category') . ':') !!}
-                  {!! Form::select('category_id', $categories, $product->category_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2']); !!}
+                  {!! Form::select('category_id', $categories, $product->category_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2 vp-pc-select']); !!}
               </div>
             </div>
 
             <div class="col-sm-4 @if(!(session('business.enable_category') && session('business.enable_sub_category'))) hide @endif">
               <div class="form-group">
                 {!! Form::label('sub_category_id', __('product.sub_category')  . ':') !!}
-                  {!! Form::select('sub_category_id', $sub_categories, $product->sub_category_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2']); !!}
+                  {!! Form::select('sub_category_id', $sub_categories, $product->sub_category_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2 vp-pc-select']); !!}
               </div>
             </div>
 
             <div class="col-sm-4">
               <div class="form-group">
                 {!! Form::label('product_locations', __('business.business_locations') . ':') !!} @show_tooltip(__('lang_v1.product_location_help'))
-                  {!! Form::select('product_locations[]', $business_locations, $product->product_locations->pluck('id'), ['class' => 'form-control select2', 'multiple', 'id' => 'product_locations']); !!}
+                  {!! Form::select('product_locations[]', $business_locations, $product->product_locations->pluck('id'), ['class' => 'form-control select2 vp-pc-select', 'multiple', 'id' => 'product_locations']); !!}
               </div>
             </div>
 
@@ -129,7 +127,7 @@
             <div class="col-sm-4" id="alert_quantity_div" @if(!$product->enable_stock) style="display:none" @endif>
               <div class="form-group">
                 {!! Form::label('alert_quantity', __('product.alert_quantity') . ':') !!} @show_tooltip(__('tooltip.alert_quantity'))
-                {!! Form::text('alert_quantity', $alert_quantity, ['class' => 'form-control input_number',
+                {!! Form::text('alert_quantity', $alert_quantity, ['class' => 'form-control input_number vp-pc-input',
                 'placeholder' => __('product.alert_quantity') , 'min' => '0']); !!}
               </div>
             </div>
@@ -137,7 +135,7 @@
             <div class="col-sm-4">
               <div class="form-group">
                 {!! Form::label('warranty_id', __('lang_v1.warranty') . ':') !!}
-                {!! Form::select('warranty_id', $warranties, $product->warranty_id, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                {!! Form::select('warranty_id', $warranties, $product->warranty_id, ['class' => 'form-control select2 vp-pc-select', 'placeholder' => __('messages.please_select')]); !!}
               </div>
             </div>
             @endif
@@ -150,33 +148,55 @@
                 @endforeach
             @endif
             <div class="clearfix"></div>
-            <div class="col-sm-8">
+            <div class="col-sm-8 mb-5">
               <div class="form-group">
                 {!! Form::label('product_description', __('lang_v1.product_description') . ':') !!}
                   {!! Form::textarea('product_description', $product->product_description, ['class' => 'form-control']); !!}
               </div>
             </div>
             <div class="col-sm-4">
-              <div class="form-group">
-                {!! Form::label('image', __('lang_v1.product_image') . ':') !!}
-                {!! Form::file('image', ['id' => 'upload_image', 'accept' => 'image/*', 'required' => $is_image_required]); !!}
-                <small><p class="help-block">@lang('purchase.max_file_size', ['size' => (config('constants.document_size_limit') / 1000000)]). @lang('lang_v1.aspect_ratio_should_be_1_1') @if(!empty($product->image)) <br> @lang('lang_v1.previous_image_will_be_replaced') @endif</p></small>
+              <div class="form-group vp-pc-product-image-field">
+                <div class="vp-pc-img-label" id="upload_image_label">@lang('lang_v1.product_image'):</div>
+                <label class="vp-pc-image-dropzone" for="upload_image" aria-labelledby="upload_image_label">
+                    {!! Form::file('image', ['id' => 'upload_image', 'accept' => 'image/*',
+                    'required' => $is_image_required, 'class' => 'vp-pc-image-file']); !!}
+                    <span class="vp-pc-image-dropzone-ui">
+                        <i class="fa fa-cloud-upload vp-pc-image-upload-icon" aria-hidden="true"></i>
+                        <span class="vp-pc-image-dropzone-text">Upload Browse...</span>
+                    </span>
+                </label>
+                <div class="vp-pc-image-help">
+                    <p class="help-block vp-pc-help">@lang('purchase.max_file_size', ['size' => (config('constants.document_size_limit') / 1000000)])</p>
+                    <p class="help-block vp-pc-help">@lang('lang_v1.aspect_ratio_should_be_1_1')</p>
+                    @if(!empty($product->image))
+                    <p class="help-block vp-pc-help">@lang('lang_v1.previous_image_will_be_replaced')</p>
+                    @endif
+                    <p class="help-block vp-pc-help vp-pc-image-allowed">@lang('lang_v1.allowed_file'): .jpeg, .jpg, .png, .gif, .webp</p>
+                </div>
               </div>
             </div>
-            </div>
-            <div class="col-sm-4">
-              <div class="form-group">
-                {!! Form::label('product_brochure', __('lang_v1.product_brochure') . ':') !!}
-                {!! Form::file('product_brochure', ['id' => 'product_brochure', 'accept' => implode(',', array_keys(config('constants.document_upload_mimes_types')))]); !!}
-                <small>
-                    <p class="help-block">
-                        @lang('lang_v1.previous_file_will_be_replaced')<br>
-                        @lang('purchase.max_file_size', ['size' => (config('constants.document_size_limit') / 1000000)])
+
+            <div class="clearfix"></div>
+
+            <div class="col-sm-12">
+                <div class="form-group vp-pc-brochure-field">
+                    <div class="vp-pc-img-label" id="product_brochure_label">@lang('lang_v1.product_brochure'):</div>
+                    <label class="vp-pc-image-dropzone vp-pc-image-dropzone--brochure" for="product_brochure" aria-labelledby="product_brochure_label">
+                        {!! Form::file('product_brochure', ['id' => 'product_brochure', 'accept' => implode(',', array_keys(config('constants.document_upload_mimes_types'))), 'class' => 'vp-pc-image-file']); !!}
+                        <span class="vp-pc-image-dropzone-ui vp-pc-brochure-dropzone-ui">
+                            <i class="fa fa-cloud-upload vp-pc-image-upload-icon vp-pc-brochure-upload-icon" aria-hidden="true"></i>
+                            <span class="vp-pc-brochure-dropzone-text"><span class="vp-pc-brochure-txt-upload">Upload</span><span class="vp-pc-brochure-txt-browse"> Browse...</span></span>
+                        </span>
+                    </label>
+                    <div class="vp-pc-image-help vp-pc-brochure-help">
+                        <p class="help-block">@lang('lang_v1.previous_file_will_be_replaced')</p>
+                        <p class="help-block">@lang('purchase.max_file_size', ['size' => (config('constants.document_size_limit') / 1000000)])</p>
+                        <p class="help-block">@lang('lang_v1.allowed_file'): {{ implode(', ', array_values(config('constants.document_upload_mimes_types'))) }}</p>
                         @includeIf('components.document_help_text')
-                    </p>
-                </small>
-              </div>
+                    </div>
+                </div>
             </div>
+        </div>
     @endcomponent
 
     @component('components.widget', ['class' => 'box-primary'])
@@ -216,8 +236,8 @@
           </div>
           @endif
           <div class="col-sm-4">
-            <div class="checkbox">
-              <label>
+            <div class="form-group vp-pc-checkbox-block">
+              <label class="vp-pc-checkbox-label">
                 {!! Form::checkbox('enable_sr_no', 1, $product->enable_sr_no, ['class' => 'input-icheck']); !!} <strong>@lang('lang_v1.enable_imei_or_sr_no')</strong>
               </label>
               @show_tooltip(__('lang_v1.tooltip_sr_no'))
@@ -225,9 +245,8 @@
           </div>
 
           <div class="col-sm-4">
-          <div class="form-group">
-            <br>
-            <label>
+          <div class="form-group vp-pc-checkbox-block">
+            <label class="vp-pc-checkbox-label">
               {!! Form::checkbox('not_for_selling', 1, $product->not_for_selling, ['class' => 'input-icheck']); !!} <strong>@lang('lang_v1.not_for_selling')</strong>
             </label> @show_tooltip(__('lang_v1.tooltip_not_for_selling'))
           </div>
@@ -277,7 +296,7 @@
         <div class="col-sm-4">
           <div class="form-group">
             {!! Form::label('weight',  __('lang_v1.weight') . ':') !!}
-            {!! Form::text('weight', $product->weight, ['class' => 'form-control', 'placeholder' => __('lang_v1.weight')]); !!}
+            {!! Form::text('weight', $product->weight, ['class' => 'form-control vp-pc-input', 'placeholder' => __('lang_v1.weight')]); !!}
           </div>
         </div>
         <div class="clearfix"></div>
@@ -319,7 +338,7 @@
         <div class="col-sm-3">
           <div class="form-group">
             {!! Form::label('preparation_time_in_minutes',  __('lang_v1.preparation_time_in_minutes') . ':') !!}
-            {!! Form::number('preparation_time_in_minutes', $product->preparation_time_in_minutes, ['class' => 'form-control', 'placeholder' => __('lang_v1.preparation_time_in_minutes')]); !!}
+            {!! Form::number('preparation_time_in_minutes', $product->preparation_time_in_minutes, ['class' => 'form-control vp-pc-input', 'placeholder' => __('lang_v1.preparation_time_in_minutes')]); !!}
           </div>
         </div>
         <!--custom fields-->
@@ -328,11 +347,13 @@
     @endcomponent
 
     @component('components.widget', ['class' => 'box-primary'])
-        <div class="row">
+        <div class="row vp-pc-pricing-card">
+            <div class="col-sm-12">
+            <div class="row vp-pc-pricing-dropdowns">
             <div class="col-sm-4 @if(!session('business.enable_price_tax')) hide @endif">
               <div class="form-group">
                 {!! Form::label('tax', __('product.applicable_tax') . ':') !!}
-                  {!! Form::select('tax', $taxes, $product->tax, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2'], $tax_attributes); !!}
+                  {!! Form::select('tax', $taxes, $product->tax, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2 vp-pc-select'], $tax_attributes); !!}
               </div>
             </div>
 
@@ -340,17 +361,18 @@
               <div class="form-group">
                 {!! Form::label('tax_type', __('product.selling_price_tax_type') . ':*') !!}
                   {!! Form::select('tax_type',['inclusive' => __('product.inclusive'), 'exclusive' => __('product.exclusive')], $product->tax_type,
-                  ['class' => 'form-control select2', 'required']); !!}
+                  ['class' => 'form-control select2 vp-pc-select', 'required']); !!}
               </div>
             </div>
 
-            <div class="clearfix"></div>
             <div class="col-sm-4">
               <div class="form-group">
                 {!! Form::label('type', __('product.product_type') . ':*') !!} @show_tooltip(__('tooltip.product_type'))
-                {!! Form::select('type', $product_types, $product->type, ['class' => 'form-control select2',
+                {!! Form::select('type', $product_types, $product->type, ['class' => 'form-control select2 vp-pc-select',
                   'required','disabled', 'data-action' => 'edit', 'data-product_id' => $product->id ]); !!}
               </div>
+            </div>
+            </div>
             </div>
 
             <div class="form-group col-sm-12" id="product_form_part"></div>
@@ -359,30 +381,34 @@
             </div>
     @endcomponent
 
-  <div class="row">
-    <input type="hidden" name="submit_type" id="submit_type">
-        <div class="col-sm-12">
-          <div class="text-center">
-            <div class="btn-group">
+    <div class="vp-product-create-footer">
+        <div class="row">
+            <div class="col-sm-12">
+                <input type="hidden" name="submit_type" id="submit_type">
+                <div class="vp-pc-action-buttons">
               @if($selling_price_group_count)
-                <button type="submit" value="submit_n_add_selling_prices" class="tw-dw-btn tw-dw-btn-warning tw-text-white tw-dw-btn-lg submit_product_form">@lang('lang_v1.save_n_add_selling_price_group_prices')</button>
+                <button type="submit" value="submit_n_add_selling_prices" class="btn vp-pc-btn vp-pc-btn-save-another submit_product_form">@lang('lang_v1.save_n_add_selling_price_group_prices')</button>
               @endif
 
               @can('product.opening_stock')
-              <button type="submit" @if(empty($product->enable_stock)) disabled="true" @endif id="opening_stock_button"  value="update_n_edit_opening_stock" class="tw-dw-btn tw-text-white tw-dw-btn-lg bg-purple submit_product_form">@lang('lang_v1.update_n_edit_opening_stock')</button>
-              @endif
+              <button type="submit" @if(empty($product->enable_stock)) disabled="true" @endif id="opening_stock_button"  value="update_n_edit_opening_stock" class="btn vp-pc-btn vp-pc-btn-opening submit_product_form">@lang('lang_v1.update_n_edit_opening_stock')</button>
+              @endcan
 
-              <button type="submit" value="save_n_add_another" class="tw-dw-btn tw-text-white tw-dw-btn-lg bg-maroon submit_product_form">@lang('lang_v1.update_n_add_another')</button>
+              <button type="submit" value="save_n_add_another" class="btn vp-pc-btn vp-pc-btn-save-another submit_product_form">@lang('lang_v1.update_n_add_another')</button>
 
-              <button type="submit" value="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg submit_product_form">@lang('messages.update')</button>
+              <button type="submit" value="submit" class="btn vp-pc-btn vp-pc-btn-save submit_product_form">@lang('messages.update')</button>
+                </div>
             </div>
-          </div>
         </div>
-  </div>
+    </div>
 {!! Form::close() !!}
-</section>
-<!-- /.content -->
+    </section>
+</div>
 
+@endsection
+
+@section('css')
+    @include('product.partials.vendo_product_form_page_styles')
 @endsection
 
 @section('javascript')

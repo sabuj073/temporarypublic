@@ -3,13 +3,15 @@
 
 @section('content')
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('expense.add_expense')</h1>
-</section>
+<div class="vp-vendo-page-wrap">
+    @include('layouts.partials.vendo_form_page_head', [
+        'vendoFormPageHeadBackUrl' => action([\App\Http\Controllers\ExpenseController::class, 'index']),
+        'vendoFormPageHeadBackLabel' => __('expense.all_expenses'),
+        'vendoFormPageHeadTitle' => __('expense.add_expense'),
+    ])
 
 <!-- Main content -->
-<section class="content">
+<section class="content vp-vendo-form-content">
 	{!! Form::open(['url' => action([\App\Http\Controllers\ExpenseController::class, 'store']), 'method' => 'post', 'id' => 'add_expense_form', 'files' => true ]) !!}
 	<div class="box box-solid">
 		<div class="box-body">
@@ -50,7 +52,6 @@
 			            </p>
 					</div>
 				</div>
-				<div class="clearfix"></div>
 				<div class="col-sm-4">
 					<div class="form-group">
 						{!! Form::label('transaction_date', __('messages.date') . ':*') !!}
@@ -74,7 +75,6 @@
 						{!! Form::select('contact_id', $contacts, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
 					</div>
 				</div>
-				<div class="clearfix"></div>
 				<div class="col-sm-4">
                     <div class="form-group">
                         {!! Form::label('document', __('purchase.attach_document') . ':') !!}
@@ -103,7 +103,6 @@
 						{!! Form::text('final_total', null, ['class' => 'form-control input_number', 'placeholder' => __('sale.total_amount'), 'required']); !!}
 					</div>
 				</div>
-				<div class="clearfix"></div>
 				<div class="col-sm-4">
 					<div class="form-group">
 						{!! Form::label('additional_notes', __('expense.expense_note') . ':') !!}
@@ -139,6 +138,7 @@
 	</div>
 {!! Form::close() !!}
 </section>
+</div>
 @endsection
 @section('javascript')
 <script type="text/javascript">

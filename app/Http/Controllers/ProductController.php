@@ -1083,7 +1083,7 @@ class ProductController extends Controller
         if ($request->input('action') == 'add') {
             if ($request->input('type') == 'single') {
                 return view('product.partials.single_product_form_part')
-                        ->with(['profit_percent' => $profit_percent]);
+                        ->with(['profit_percent' => $profit_percent, 'vendo_pricing_ui' => true]);
             } elseif ($request->input('type') == 'variable') {
                 $variation_templates = VariationTemplate::where('business_id', $business_id)->pluck('name', 'id')->toArray();
                 $variation_templates = ['' => __('messages.please_select')] + $variation_templates;
@@ -1103,7 +1103,7 @@ class ProductController extends Controller
                     ->first();
 
                 return view('product.partials.edit_single_product_form_part')
-                            ->with(compact('product_deatails', 'action'));
+                            ->with(array_merge(compact('product_deatails', 'action'), ['vendo_pricing_ui' => true]));
             } elseif ($request->input('type') == 'variable') {
                 $product_variations = ProductVariation::where('product_id', $product_id)
                         ->with(['variations', 'variations.media'])

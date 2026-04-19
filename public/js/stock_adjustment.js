@@ -104,37 +104,51 @@ $(document).ready(function() {
 
     $('form#stock_adjustment_form').validate();
 
-    stock_adjustment_table = $('#stock_adjustment_table').DataTable({
-        processing: true,
-        serverSide: true,
-        fixedHeader:false,
-        ajax: '/stock-adjustments',
-        columnDefs: [
-            {
-                targets: 0,
-                orderable: false,
-                searchable: false,
+    if ($('#stock_adjustment_table').length) {
+        var _stock_adjustment_table_opts = {
+            processing: true,
+            serverSide: true,
+            fixedHeader: false,
+            aaSorting: [[0, 'desc']],
+            ajax: '/stock-adjustments',
+            columnDefs: [
+                {
+                    targets: 8,
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            columns: [
+                { data: 'transaction_date', name: 'transaction_date' },
+                { data: 'ref_no', name: 'ref_no' },
+                { data: 'location_name', name: 'BL.name' },
+                { data: 'adjustment_type', name: 'adjustment_type' },
+                { data: 'final_total', name: 'final_total' },
+                { data: 'total_amount_recovered', name: 'total_amount_recovered' },
+                { data: 'additional_notes', name: 'additional_notes' },
+                { data: 'added_by', name: 'u.first_name' },
+                { data: 'action', name: 'action' },
+            ],
+            fnDrawCallback: function(oSettings) {
+                __currency_convert_recursively($('#stock_adjustment_table'));
+                if (typeof window.__vpStockAdjustmentMoveLayout === 'function') {
+                    window.__vpStockAdjustmentMoveLayout();
+                }
             },
-        ],
-        aaSorting: [[1, 'desc']],
-        columns: [
-            { data: 'action', name: 'action' },
-            { data: 'transaction_date', name: 'transaction_date' },
-            { data: 'ref_no', name: 'ref_no' },
-            { data: 'location_name', name: 'BL.name' },
-            { data: 'adjustment_type', name: 'adjustment_type' },
-            { data: 'final_total', name: 'final_total' },
-            { data: 'total_amount_recovered', name: 'total_amount_recovered' },
-            { data: 'additional_notes', name: 'additional_notes' },
-            { data: 'added_by', name: 'u.first_name' },
-        ],
-        fnDrawCallback: function(oSettings) {
-            __currency_convert_recursively($('#stock_adjustment_table'));
-        },
-    });
-    var detailRows = [];
+            initComplete: function() {
+                if (typeof window.__vpStockAdjustmentMoveLayout === 'function') {
+                    window.__vpStockAdjustmentMoveLayout();
+                }
+            },
+        };
+        if (typeof window.__vpStockAdjustmentDataTableOverrides !== 'undefined' && window.__vpStockAdjustmentDataTableOverrides !== null) {
+            $.extend(true, _stock_adjustment_table_opts, window.__vpStockAdjustmentDataTableOverrides);
+        }
+        stock_adjustment_table = $('#stock_adjustment_table').DataTable(_stock_adjustment_table_opts);
+    }
 
     $(document).on('click', 'button.delete_stock_adjustment', function() {
+        var $delBtn = $(this);
         swal({
             title: LANG.sure,
             icon: 'warning',
@@ -142,7 +156,7 @@ $(document).ready(function() {
             dangerMode: true,
         }).then(willDelete => {
             if (willDelete) {
-                var href = $(this).data('href');
+                var href = $delBtn.data('href');
                 $.ajax({
                     method: 'DELETE',
                     url: href,
@@ -150,7 +164,9 @@ $(document).ready(function() {
                     success: function(result) {
                         if (result.success) {
                             toastr.success(result.msg);
-                            stock_adjustment_table.ajax.reload();
+                            if (typeof stock_adjustment_table !== 'undefined' && stock_adjustment_table) {
+                                stock_adjustment_table.ajax.reload();
+                            }
                         } else {
                             toastr.error(result.msg);
                         }

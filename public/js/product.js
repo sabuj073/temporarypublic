@@ -1,5 +1,64 @@
 //This file contains all functions used products tab
 
+function bindVpProductFormDropzones() {
+    function bindVpDropzone($wrap) {
+        var $dz = $wrap.find('.vp-pc-image-dropzone').first();
+        var $input = $dz.find('input[type=file]').first();
+        var $text = $dz.find('.vp-pc-image-dropzone-text, .vp-pc-brochure-dropzone-text, .vp-pc-variation-dropzone-text').first();
+        if (!$input.length || !$text.length) {
+            return;
+        }
+        var isBrochure = $wrap.hasClass('vp-pc-brochure-field');
+        var brochureLabelHtml =
+            '<span class="vp-pc-brochure-txt-upload">Upload</span><span class="vp-pc-brochure-txt-browse"> Browse...</span>';
+        var defaultText = $text.text().trim();
+        $input.off('change.vpDz').on('change.vpDz', function() {
+            var n = this.files ? this.files.length : 0;
+            var f = n ? this.files[0] : null;
+            if (f) {
+                var label = f.name;
+                if (this.multiple && n > 1) {
+                    label = n + ' files';
+                }
+                $text.text(label);
+            } else {
+                if (isBrochure) {
+                    $text.html(brochureLabelHtml);
+                } else {
+                    $text.text(defaultText);
+                }
+            }
+            $dz.toggleClass('vp-pc-image-dropzone--has-file', n > 0);
+        });
+        $dz.off('dragover.vpDz dragleave.vpDz drop.vpDz');
+        $dz.on('dragover.vpDz', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).addClass('vp-pc-image-dropzone--active');
+        });
+        $dz.on('dragleave.vpDz', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('vp-pc-image-dropzone--active');
+        });
+        $dz.on('drop.vpDz', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('vp-pc-image-dropzone--active');
+        });
+    }
+
+    if ($('.vp-pc-product-image-field').length) {
+        bindVpDropzone($('.vp-pc-product-image-field').first());
+    }
+    if ($('.vp-pc-brochure-field').length) {
+        bindVpDropzone($('.vp-pc-brochure-field').first());
+    }
+    $('.vp-pc-variation-image-field').each(function() {
+        bindVpDropzone($(this));
+    });
+}
+
 $(document).ready(function() {
     $(document).on('ifChecked', 'input#enable_stock', function() {
         $('div#alert_quantity_div').show();
@@ -587,7 +646,10 @@ $(document).ready(function() {
             image: { width: 'auto', height: 'auto', 'max-width': '100%', 'max-height': '100%' },
         },
     };
-    $('#upload_image').fileinput(img_fileinput_setting);
+    // Product create uses a custom dashed dropzone (see create.blade.php); skip plugin there.
+    if ($('#upload_image').length && !$('#upload_image').closest('.vp-pc-product-image-field').length) {
+        $('#upload_image').fileinput(img_fileinput_setting);
+    }
 
     if ($('textarea#product_description').length > 0) {
         tinymce.init({
@@ -595,6 +657,8 @@ $(document).ready(function() {
             height:250
         });
     }
+
+    bindVpProductFormDropzones();
 });
 
 function toggle_dsp_input() {

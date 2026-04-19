@@ -738,7 +738,9 @@ $(document).ready(function() {
         });
         $('#profit_loss_date_filter').on('cancel.daterangepicker', function(ev, picker) {
             $('#profit_loss_date_filter').html(
-                '<i class="fa fa-calendar"></i> ' + LANG.filter_by_date
+                '<span><i class="fa fa-calendar"></i> ' +
+                    LANG.filter_by_date +
+                    '</span><i class="fa fa-caret-down"></i>'
             );
         });
         updateProfitLoss();

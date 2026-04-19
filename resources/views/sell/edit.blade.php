@@ -6,12 +6,28 @@
 @section('title', $title)
 
 @section('content')
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">{{$title}} <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">(@if($transaction->type == 'sales_order') @lang('restaurant.order_no') @else @lang('sale.invoice_no') @endif: <span class="text-success">#{{$transaction->invoice_no}})</span></small></h1>
-</section>
+<div class="vp-vendo-page-wrap">
+    <div class="vp-vendo-form-page-head">
+        <a href="{{ action([\App\Http\Controllers\SellController::class, 'index']) }}" class="vp-vendo-form-back"
+            aria-label="{{ __('sale.sells') }}">
+            <img src="{{ asset('images/dashboard-icons/sales-back.png') }}" alt="">
+        </a>
+        <div class="vp-vendo-form-head-main">
+            <h1 class="vp-vendo-form-title tw-inline tw-text-left">
+                {{ $title }}
+                <span class="vp-vendo-form-title-sub tw-block tw-mt-1 tw-text-base tw-font-semibold tw-opacity-90">
+                    @if($transaction->type == 'sales_order')
+                        @lang('restaurant.order_no')
+                    @else
+                        @lang('sale.invoice_no')
+                    @endif:
+                    <span class="tw-text-green-300">#{{ $transaction->invoice_no }}</span>
+                </span>
+            </h1>
+        </div>
+    </div>
 <!-- Main content -->
-<section class="content">
+<section class="content vp-vendo-form-content">
 <input type="hidden" id="amount_rounding_method" value="{{$pos_settings['amount_rounding_method'] ?? ''}}">
 <input type="hidden" id="amount_rounding_method" value="{{$pos_settings['amount_rounding_method'] ?? 'none'}}">
 @if(!empty($pos_settings['allow_overselling']))
@@ -858,6 +874,7 @@
 
 @include('sale_pos.partials.configure_search_modal')
 
+</div>
 @stop
 
 @section('javascript')

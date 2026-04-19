@@ -39,9 +39,9 @@
     $isHomeDashboardHeader = $segment1 === 'home' && empty($request->segment(2));
     $topNav = [
         ['label' => 'Home', 'url' => action([\App\Http\Controllers\HomeController::class, 'index']), 'active' => $segment1 === 'home', 'icon_path' => 'images/dashboard-icons/nav/home.png', 'fallback_icon' => 'fa-home'],
-        ['label' => 'Sales', 'url' => action([\App\Http\Controllers\SellController::class, 'index']), 'active' => in_array($segment1, ['sells', 'sell']), 'icon_path' => 'images/dashboard-icons/nav/sales.png', 'fallback_icon' => 'fa-bar-chart'],
-        ['label' => 'Products', 'url' => action([\App\Http\Controllers\ProductController::class, 'index']), 'active' => $segment1 === 'products', 'icon_path' => 'images/dashboard-icons/nav/products.png', 'fallback_icon' => 'fa-cubes'],
-        ['label' => 'Settings', 'url' => action([\App\Http\Controllers\BusinessController::class, 'getBusinessSettings']), 'active' => in_array($segment1, ['business', 'invoice-layouts', 'invoice-schemes', 'tax-rates']), 'icon_path' => 'images/dashboard-icons/nav/settings.png', 'fallback_icon' => 'fa-cog'],
+        ['label' => 'Sales', 'url' => action([\App\Http\Controllers\SellController::class, 'index']), 'active' => in_array($segment1, ['sells', 'sell', 'purchases', 'stock-transfers', 'stock-adjustments']), 'icon_path' => 'images/dashboard-icons/nav/sales.png', 'fallback_icon' => 'fa-bar-chart'],
+        ['label' => 'Products', 'url' => action([\App\Http\Controllers\ProductController::class, 'index']), 'active' => in_array($segment1, ['products', 'expenses', 'expense-categories']), 'icon_path' => 'images/dashboard-icons/nav/products.png', 'fallback_icon' => 'fa-cubes'],
+        ['label' => 'Settings', 'url' => action([\App\Http\Controllers\BusinessController::class, 'getBusinessSettings']), 'active' => in_array($segment1, ['business', 'invoice-layouts', 'invoice-schemes', 'tax-rates']) || $request->path() === 'users', 'icon_path' => 'images/dashboard-icons/nav/settings.png', 'fallback_icon' => 'fa-cog'],
     ];
 @endphp
 
@@ -155,7 +155,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
 
     .vp-global-left,
@@ -164,6 +164,17 @@
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    .vp-global-left {
+        flex: 1 1 auto;
+        flex-wrap: nowrap;
+    }
+
+    .vp-global-right {
+        flex: 0 1 auto;
+        justify-content: flex-end;
     }
 
     .vp-side-btn {
@@ -218,6 +229,8 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        min-width: 0;
+        flex-wrap: nowrap;
     }
 
     .vp-global-location-wrap {
@@ -241,13 +254,17 @@
 
     .vp-global-select-location {
         padding-left: 38px !important;
-        min-width: 250px;
+        min-width: 220px;
+        width: 220px;
+        max-width: 220px;
     }
 
     .vp-global-location-pill {
         gap: 8px;
-        min-width: 250px;
+        min-width: 220px;
+        max-width: 220px;
         justify-content: flex-start;
+        overflow: hidden;
     }
 
     .vp-global-location-icon-image {
@@ -281,7 +298,12 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 2px;
+        scrollbar-width: thin;
     }
 
     .vp-global-nav-link {
@@ -296,6 +318,8 @@
         color: rgba(255, 255, 255, 0.95);
         font-size: 15px;
         font-weight: 600;
+        white-space: nowrap;
+        flex: 0 0 auto;
     }
 
     .vp-global-nav-link.is-active,
@@ -322,7 +346,7 @@
     .vp-admin-menu summary {
         list-style: none;
         cursor: pointer;
-        min-width: 270px;
+        min-width: 0;
         display: inline-flex;
         align-items: center;
         gap: 10px;
@@ -331,6 +355,7 @@
         border: none;
         background: transparent;
         color: #fff;
+        max-width: 250px;
     }
 
     .vp-admin-menu summary::-webkit-details-marker {
@@ -417,7 +442,125 @@
         background: #f1f4ff;
     }
 
+    @media (max-width: 1366px) {
+        .vp-global-header {
+            margin: 16px 16px 0;
+            padding: 8px 10px;
+        }
+
+        body.vp-home-dashboard .vp-global-header {
+            margin: 16px 16px 0;
+        }
+
+        .vp-global-left,
+        .vp-global-right {
+            gap: 6px;
+        }
+
+        .vp-global-logo-wrap {
+            width: 170px;
+            min-height: 36px;
+            padding: 4px 8px;
+        }
+
+        .vp-global-logo-image {
+            max-height: 28px;
+        }
+
+        .vp-global-select,
+        .vp-global-pill {
+            height: 30px;
+            font-size: 12px;
+            padding: 0 8px;
+        }
+
+        .vp-global-select-location,
+        .vp-global-location-pill {
+            min-width: 180px;
+            max-width: 180px;
+        }
+
+        .vp-global-select-location {
+            width: 180px;
+        }
+
+        .vp-global-nav {
+            gap: 6px;
+        }
+
+        .vp-global-nav-link {
+            height: 32px;
+            padding: 0 10px;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .vp-global-nav-icon-image {
+            width: 18px;
+            height: 18px;
+        }
+
+        .vp-admin-menu {
+            margin-left: 6px;
+            padding-left: 8px;
+        }
+
+        .vp-admin-menu summary {
+            gap: 8px;
+            padding: 4px 8px;
+            max-width: 210px;
+        }
+
+        .vp-admin-avatar-wrap {
+            width: 42px;
+            height: 42px;
+        }
+
+        .vp-admin-text strong {
+            font-size: 15px;
+        }
+
+        .vp-admin-text small {
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 1280px) {
+        .vp-global-inner {
+            flex-wrap: wrap;
+            align-items: stretch;
+        }
+
+        .vp-global-left,
+        .vp-global-right {
+            width: 100%;
+        }
+
+        .vp-global-right {
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            justify-content: space-between;
+        }
+
+        .vp-global-nav {
+            flex: 1;
+        }
+
+        .vp-admin-menu {
+            margin-left: 8px;
+        }
+
+        .vp-admin-menu summary {
+            max-width: 240px;
+        }
+    }
+
     @media (max-width: 1024px) {
+        .vp-global-inner {
+            flex-wrap: wrap;
+        }
+
         .vp-global-nav-link {
             height: 36px;
             padding: 0 10px;

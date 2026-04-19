@@ -1,11 +1,12 @@
 @php
     $is_mobile = isMobile();
+    $vp_embed_pos_actions = !empty($vp_embed_pos_actions);
 @endphp
-<div class="row">
+<div class="row @if ($vp_embed_pos_actions) vp-pos-actions-embed-row @endif">
     <div
-        class="pos-form-actions tw-rounded-tr-xl tw-rounded-tl-xl tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-bg-white tw-cursor-pointer">
+        class="pos-form-actions tw-cursor-pointer @if ($vp_embed_pos_actions) vp-pos-actions-embed @else tw-rounded-tr-xl tw-rounded-tl-xl tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-bg-white @endif">
         <div
-            class="tw-flex tw-items-center tw-justify-between tw-flex-col sm:tw-flex-row md:tw-flex-row lg:tw-flex-row xl:tw-flex-row tw-gap-2 tw-px-4 tw-py-0 tw-overflow-x-auto tw-w-full">
+            class="tw-flex tw-items-center tw-justify-between tw-flex-col sm:tw-flex-row md:tw-flex-row lg:tw-flex-row xl:tw-flex-row tw-gap-2 tw-py-0 tw-overflow-x-auto tw-w-full @if ($vp_embed_pos_actions) tw-px-2 @else tw-px-4 @endif">
 
             <div class="md:!tw-w-none !tw-flex md:!tw-hidden !tw-flex-row !tw-items-center !tw-gap-3">
                 <div class="tw-pos-total tw-flex tw-items-center tw-gap-3">

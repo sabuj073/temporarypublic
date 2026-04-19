@@ -3,13 +3,15 @@
 
 @section('content')
 
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.add_stock_transfer')</h1>
-    </section>
+<div class="vp-vendo-page-wrap">
+    @include('layouts.partials.vendo_form_page_head', [
+        'vendoFormPageHeadBackUrl' => action([\App\Http\Controllers\StockTransferController::class, 'index']),
+        'vendoFormPageHeadBackLabel' => __('lang_v1.all_stock_transfers'),
+        'vendoFormPageHeadTitle' => __('lang_v1.add_stock_transfer'),
+    ])
 
     <!-- Main content -->
-    <section class="content no-print">
+    <section class="content no-print vp-vendo-form-content">
         {!! Form::open([
             'url' => action([\App\Http\Controllers\StockTransferController::class, 'store']),
             'method' => 'post',
@@ -165,6 +167,7 @@
 
         {!! Form::close() !!}
     </section>
+</div>
 @stop
 @section('javascript')
     <script src="{{ asset('js/stock_transfer.js?v=' . $asset_v) }}"></script>

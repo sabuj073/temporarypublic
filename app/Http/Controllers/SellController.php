@@ -867,6 +867,16 @@ class SellController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        // POS / screen sales: use the POS edit screen (same UX as /pos/{id}/edit).
+        if ($transaction->type == 'sell' && (int) $transaction->is_direct_sale === 0) {
+            if (auth()->user()->can('superadmin') || auth()->user()->can('sell.update')
+                || auth()->user()->can('edit_pos_payment')
+                || ($moduleUtil->hasThePermissionInSubscription($business_id, 'repair_module')
+                    && auth()->user()->can('repair.update'))) {
+                return redirect()->action([\App\Http\Controllers\SellPosController::class, 'edit'], [$id]);
+            }
+        }
+
         $location_id = $transaction->location_id;
         $location_printer_type = BusinessLocation::find($location_id)->receipt_printer_type;
 

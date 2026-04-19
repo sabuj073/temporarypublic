@@ -26,10 +26,12 @@
                 $username = $demo_types[$_GET['demo_type']];
             }
         }
+        $login_is_demo = config('app.env') == 'demo';
     @endphp
-    <div class="row">
-        <div class="col-md-4">
-        @if (config('app.env') == 'demo')
+    <div class="vp-login-page-center-wrap">
+    <div class="row vp-login-root-row">
+        <div class="vp-login-demo-col @if ($login_is_demo) col-md-4 @else hidden @endif">
+        @if ($login_is_demo)
         
                 @component('components.widget', [
                     'class' => 'box-primary',
@@ -105,15 +107,14 @@
         
     @endif
         </div>
-        <div class="col-md-4">
-            <div
-                class="tw-p-5 md:tw-p-6 tw-mb-4 tw-rounded-2xl tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-ring-1 tw-ring-gray-200">
-                <div class="tw-flex tw-flex-col tw-gap-4 tw-dw-rounded-box tw-dw-p-6 tw-dw-max-w-md">
-                    <div class="tw-flex tw-items-center tw-flex-col">
-                        <h1 class="tw-text-lg md:tw-text-xl tw-font-semibold tw-text-[#1e1e1e]">
+        <div class="@if ($login_is_demo) col-md-4 @else col-md-6 col-md-offset-3 col-sm-10 col-sm-offset-1 col-xs-12 @endif">
+            <div class="vp-login-shell tw-mb-4 tw-transition-all tw-duration-200">
+                <div class="vp-login-shell-inner tw-flex tw-flex-col tw-gap-4 tw-dw-rounded-box tw-dw-p-2 md:tw-dw-p-4">
+                    <div class="tw-flex tw-items-center tw-flex-col tw-text-center">
+                        <h1 class="tw-text-lg md:tw-text-xl tw-font-semibold tw-text-white">
                             @lang('lang_v1.welcome_back')
                         </h1>
-                        <h2 class="tw-text-sm tw-font-medium tw-text-gray-500">
+                        <h2 class="tw-text-sm tw-font-medium tw-text-white/70">
                             @lang('lang_v1.login_to_your') {{ config('app.name', 'ultimatePOS') }}
                         </h2>
                     </div>
@@ -121,14 +122,14 @@
                     <form method="POST" action="{{ route('login') }}" id="login-form">
                         {{ csrf_field() }}
                         <div class="form-group has-feedback {{ $errors->has('username') ? ' has-error' : '' }}">
-                            <label class="tw-dw-form-control">
+                            <label class="tw-dw-form-control tw-relative">
                                 <div class="tw-dw-label">
                                     <span
-                                        class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-black">@lang('lang_v1.username')</span>
+                                        class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-white/90">@lang('lang_v1.username')</span>
                                 </div>
 
                                 <input
-                                    class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500 placeholder:tw-font-medium"
+                                    class="vp-login-input tw-font-medium placeholder:tw-font-medium"
                                     name="username" required autofocus placeholder="@lang('lang_v1.username')"
                                     data-last-active-input="" id="username" type="text" name="username"
                                     value="{{ $username }}" />
@@ -141,24 +142,23 @@
                         </div>
 
                         <div class="form-group has-feedback {{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label class="tw-dw-form-control">
-                                <div class="tw-dw-label">
+                            <label class="tw-dw-form-control tw-relative">
+                                <div class="tw-dw-label tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
                                     <span
-                                        class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-black">@lang('lang_v1.password')</span>
+                                        class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-white/90">@lang('lang_v1.password')</span>
                                     @if (config('app.env') != 'demo')
                                         <a href="{{ route('password.request') }}"
-                                            class="tw-text-xs md:tw-text-sm tw-font-medium tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-inline-block tw-text-transparent tw-bg-clip-text hover:tw-text-[#467BF5]"
+                                            class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-sky-300 hover:tw-text-white tw-shrink-0"
                                             tabindex="-1">@lang('lang_v1.forgot_your_password')</a>
                                     @endif
                                 </div>
 
                                 <input
-                                    class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500 placeholder:tw-font-medium"
+                                    class="vp-login-input tw-pr-10 tw-font-medium placeholder:tw-font-medium"
                                     id="password" type="password" name="password" value="{{ $password }}" required
                                     placeholder="@lang('lang_v1.password')" />
-                                <button type="button" id="show_hide_icon" class="show_hide_icon"
-                                    style="position: absolute; top:48px;right:5px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye tw-w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <button type="button" id="show_hide_icon" class="show_hide_icon tw-text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye tw-w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                         <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
                                         <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
@@ -178,7 +178,7 @@
                                 <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}
                                     class="tw-dw-checkbox">
                                 <span
-                                    class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-black tw-mt-[0.2rem]">@lang('lang_v1.remember_me')</span>
+                                    class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-white/85 tw-mt-[0.2rem]">@lang('lang_v1.remember_me')</span>
                             </label>
                         </div>
                         @if(config('constants.enable_recaptcha'))
@@ -194,7 +194,7 @@
                         </div>
                         @endif
                         <button type="submit"
-                            class="tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-h-12 tw-rounded-xl tw-text-sm md:tw-text-base tw-text-white tw-font-semibold tw-w-full tw-max-w-full mt-2 hover:tw-from-indigo-600 hover:tw-to-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-ring-offset-2 active:tw-from-indigo-700 active:tw-to-blue-700">
+                            class="vp-login-submit tw-text-sm md:tw-text-base focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-sky-400/50 focus:tw-ring-offset-0">
                             @lang('lang_v1.login')
                         </button>
                     </form>
@@ -206,16 +206,19 @@
                             <!-- Register Url -->
                             @if (config('constants.allow_registration'))
                                 <a href="{{ route('business.getRegister') }}@if (!empty(request()->lang)) {{ '?lang=' . request()->lang }} @endif"
-                                    class="tw-text-sm tw-font-medium tw-text-gray-500 hover:tw-text-gray-500 tw-mt-2">{{ __('business.not_yet_registered') }}
+                                    class="tw-text-sm tw-font-medium tw-text-white/65 hover:tw-text-white/90 tw-mt-2 tw-text-center">{{ __('business.not_yet_registered') }}
                                     <span
-                                        class="tw-text-sm tw-font-medium tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-inline-block tw-text-transparent tw-bg-clip-text hover:tw-text-[#467BF5] hover:tw-underline">{{ __('business.register_now') }}</span></a>
+                                        class="tw-text-sm tw-font-semibold tw-text-sky-300 hover:tw-text-sky-200 hover:tw-underline">{{ __('business.register_now') }}</span></a>
                             @endif
                         @endif
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4"></div>
+        @if ($login_is_demo)
+            <div class="col-md-4"></div>
+        @endif
+    </div>
     </div>
 
 @stop
@@ -239,11 +242,11 @@
 
             if (passwordInput.attr('type') === 'password') {
                 passwordInput.attr('type', 'text');
-                $('#show_hide_icon').html('<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye-off tw-w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/><path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87"/><path d="M3 3l18 18"/></svg>');
+                $('#show_hide_icon').html('<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye-off tw-w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/><path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87"/><path d="M3 3l18 18"/></svg>');
             }
             else if (passwordInput.attr('type') === 'text') {
                 passwordInput.attr('type', 'password');
-                $('#show_hide_icon').html('<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye tw-w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg>');
+                $('#show_hide_icon').html('<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye tw-w-6" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></svg>');
             }
         });
         })

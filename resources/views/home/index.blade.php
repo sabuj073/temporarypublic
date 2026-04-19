@@ -28,7 +28,7 @@
     ];
 
     $dashboardTiles = [
-        ['label' => 'Register', 'url' => action([\App\Http\Controllers\CashRegisterController::class, 'index']), 'icon_path' => 'images/dashboard-icons/register.png', 'fallback_icon' => 'fa fa-clipboard'],
+        ['label' => 'Register', 'url' => action([\App\Http\Controllers\SellPosController::class, 'create']), 'icon_path' => 'images/dashboard-icons/register.png', 'fallback_icon' => 'fa fa-clipboard'],
         ['label' => 'Sales', 'url' => action([\App\Http\Controllers\SellController::class, 'index']), 'icon_path' => 'images/dashboard-icons/sales.png', 'fallback_icon' => 'fa fa-bar-chart'],
         ['label' => 'Products', 'url' => action([\App\Http\Controllers\ProductController::class, 'index']), 'icon_path' => 'images/dashboard-icons/products.png', 'fallback_icon' => 'fa fa-cubes'],
         ['label' => 'Users', 'url' => action([\App\Http\Controllers\ManageUserController::class, 'index']), 'icon_path' => 'images/dashboard-icons/users.png', 'fallback_icon' => 'fa fa-users'],

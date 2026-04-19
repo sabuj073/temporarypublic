@@ -3,7 +3,7 @@
 @section('title', __('sale.pos_sale'))
 
 @section('content')
-<section class="content no-print">
+<section class="content no-print vp-pos-redesign">
 	<input type="hidden" id="amount_rounding_method" value="{{$pos_settings['amount_rounding_method'] ?? ''}}">
 	@if(!empty($pos_settings['allow_overselling']))
 		<input type="hidden" id="is_overselling_allowed">
@@ -20,8 +20,8 @@
 	<div class="row mb-12">
 		<div class="col-md-12 tw-pt-0 tw-mb-14">
 			<div class="row tw-flex lg:tw-flex-row md:tw-flex-col sm:tw-flex-col tw-flex-col tw-items-start md:tw-gap-4">
-				<div class="tw-px-3 tw-w-full  lg:tw-px-0 lg:tw-pr-0 @if(empty($pos_settings['hide_product_suggestion'])) lg:tw-w-[60%]  @else lg:tw-w-[100%] @endif">
-					<div class="tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-rounded-2xl tw-bg-white tw-mb-2 md:tw-mb-8 tw-p-2">
+				<div class="tw-px-3 tw-w-full  lg:tw-px-0 lg:tw-pr-0 @if(empty($pos_settings['hide_product_suggestion'])) lg:tw-w-[33.3333%]  @else lg:tw-w-[100%] @endif vp-pos-cart-col">
+					<div class="tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-rounded-2xl tw-bg-white tw-mb-2 md:tw-mb-8 tw-p-2 vp-pos-cart-shell">
 						<div class="box-body pb-0">
 							{!! Form::hidden('location_id', $transaction->location_id, ['id' => 'location_id', 'data-receipt_printer_type' => !empty($location_printer_type) ? $location_printer_type : 'browser', 'data-default_payment_accounts' => $transaction->location->default_payment_accounts]); !!}
 							<!-- sub_type -->
@@ -47,7 +47,7 @@
 						</div>
 					</div>
 				@if(empty($pos_settings['hide_product_suggestion'])  && !isMobile() && empty($only_payment))
-					<div class="col-md-5 no-padding">
+					<div class="col-md-8 no-padding vp-pos-products-col">
 						@include('sale_pos.partials.pos_sidebar')
 					</div>
 				@endif
@@ -85,7 +85,14 @@
 
 @stop
 
+@section('css')
+	<style>
+		@include('sale_pos.partials.pos_redesign_styles')
+	</style>
+@endsection
+
 @section('javascript')
+	@include('sale_pos.partials.pos_redesign_js')
 	<script src="{{ asset('js/pos.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/printer.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>

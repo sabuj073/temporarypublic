@@ -60,17 +60,17 @@ class ManageUserController extends Controller
                 )
                 ->addColumn(
                     'action',
-                    '@can("user.update")
-                        <a href="{{action(\'App\Http\Controllers\ManageUserController@edit\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</a>
-                        &nbsp;
+                    '<span class="vp-users-actions">
+                    @can("user.update")
+                        <a href="{{action(\'App\Http\Controllers\ManageUserController@edit\', [$id])}}" class="vp-users-action-btn" title="@lang("messages.edit")" aria-label="@lang("messages.edit")"><i class="glyphicon glyphicon-pencil" aria-hidden="true"></i></a>
                     @endcan
                     @can("user.view")
-                    <a href="{{action(\'App\Http\Controllers\ManageUserController@show\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info"><i class="fa fa-eye"></i> @lang("messages.view")</a>
-                    &nbsp;
+                        <a href="{{action(\'App\Http\Controllers\ManageUserController@show\', [$id])}}" class="vp-users-action-btn" title="@lang("messages.view")" aria-label="@lang("messages.view")"><i class="fa fa-eye" aria-hidden="true"></i></a>
                     @endcan
                     @can("user.delete")
-                        <button data-href="{{action(\'App\Http\Controllers\ManageUserController@destroy\', [$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error delete_user_button"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
-                    @endcan'
+                        <button type="button" data-href="{{action(\'App\Http\Controllers\ManageUserController@destroy\', [$id])}}" class="vp-users-action-btn vp-users-action-btn--danger delete_user_button" title="@lang("messages.delete")" aria-label="@lang("messages.delete")"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></button>
+                    @endcan
+                    </span>'
                 )
                 ->filterColumn('full_name', function ($query, $keyword) {
                     $query->whereRaw("CONCAT(COALESCE(surname, ''), ' ', COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) like ?", ["%{$keyword}%"]);

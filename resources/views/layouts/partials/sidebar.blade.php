@@ -1,6 +1,6 @@
 @php
     $sidebarItems = [
-        ['label' => 'Register', 'url' => action([\App\Http\Controllers\CashRegisterController::class, 'index']), 'icon_path' => 'images/dashboard-icons/register.png'],
+        ['label' => 'Register', 'url' => action([\App\Http\Controllers\SellPosController::class, 'create']), 'icon_path' => 'images/dashboard-icons/register.png'],
         ['label' => 'Sales', 'url' => action([\App\Http\Controllers\SellController::class, 'index']), 'icon_path' => 'images/dashboard-icons/sales.png'],
         ['label' => 'Products', 'url' => action([\App\Http\Controllers\ProductController::class, 'index']), 'icon_path' => 'images/dashboard-icons/products.png'],
         ['label' => 'Users', 'url' => action([\App\Http\Controllers\ManageUserController::class, 'index']), 'icon_path' => 'images/dashboard-icons/users.png'],

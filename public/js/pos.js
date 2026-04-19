@@ -1317,7 +1317,7 @@ $(document).ready(function() {
             );
         }
         get_featured_products();
-        $('.overlay-category').trigger('click');
+        $('#my-drawer-4').prop('checked', false);
     });
 
     //  function for show sub category 
@@ -1334,7 +1334,7 @@ $(document).ready(function() {
                 null
             );
             get_featured_products();
-            $('.overlay-category').trigger('click');
+            $('#my-drawer-4').prop('checked', false);
         }
         else {
             var main_category = $(this).data('value');
@@ -1371,17 +1371,17 @@ $(document).ready(function() {
             );
         }
         get_featured_products();
-        $('.overlay-brand').trigger('click');
+        $('#my-drawer-brand').prop('checked', false);
     });
 
     // close side bar 
 
     $('.close-side-bar-category').on('click', function() {
-        $('.overlay-category').trigger('click');
+        $('#my-drawer-4').prop('checked', false);
     });
 
     $('.close-side-bar-brand').on('click', function() {
-        $('.overlay-brand').trigger('click');
+        $('#my-drawer-brand').prop('checked', false);
     });
 
 

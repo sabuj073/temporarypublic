@@ -5,7 +5,7 @@
     <div class="vp-products-page-wrap">
         <!-- Content Header (Page header) -->
         <section class="content-header vp-products-header">
-            <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+            <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold">
                 <a href="{{ action([\App\Http\Controllers\HomeController::class, 'index']) }}" class="vp-products-back-btn" aria-label="Back to home">
                     <img src="{{ asset('images/dashboard-icons/sales-back.png') }}" alt="Back">
                 </a>
@@ -190,6 +190,7 @@
 
     </section>
     <!-- /.content -->
+    </div>
 
 @endsection
 

@@ -4,13 +4,15 @@
 
 @section('content')
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'user.edit_user' )</h1>
-</section>
+<div class="vp-vendo-page-wrap">
+    @include('layouts.partials.vendo_form_page_head', [
+        'vendoFormPageHeadBackUrl' => action([\App\Http\Controllers\ManageUserController::class, 'index']),
+        'vendoFormPageHeadBackLabel' => __('user.users'),
+        'vendoFormPageHeadTitle' => __('user.edit_user'),
+    ])
 
 <!-- Main content -->
-<section class="content">
+<section class="content vp-vendo-form-content">
     {!! Form::open(['url' => action([\App\Http\Controllers\ManageUserController::class, 'update'], [$user->id]), 'method' => 'PUT', 'id' => 'user_edit_form']) !!}
     <div class="row">
         <div class="col-md-12">
@@ -207,6 +209,8 @@
         </div>
     </div>
     {!! Form::close() !!}
+</section>
+</div>
   @stop
 @section('javascript')
 <script type="text/javascript">

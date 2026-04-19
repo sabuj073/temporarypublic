@@ -3,18 +3,15 @@
 
 @section('content')
 
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <br>
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('stock_adjustment.add')</h1>
-        <!-- <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-            <li class="active">Here</li>
-        </ol> -->
-    </section>
+<div class="vp-vendo-page-wrap">
+    @include('layouts.partials.vendo_form_page_head', [
+        'vendoFormPageHeadBackUrl' => action([\App\Http\Controllers\StockAdjustmentController::class, 'index']),
+        'vendoFormPageHeadBackLabel' => __('stock_adjustment.all_stock_adjustments'),
+        'vendoFormPageHeadTitle' => __('stock_adjustment.add'),
+    ])
 
     <!-- Main content -->
-    <section class="content no-print">
+    <section class="content no-print vp-vendo-form-content">
         {!! Form::open([
             'url' => action([\App\Http\Controllers\StockAdjustmentController::class, 'store']),
             'method' => 'post',
@@ -152,6 +149,7 @@
         @endcomponent
         {!! Form::close() !!}
     </section>
+</div>
 @stop
 @section('javascript')
     <script src="{{ asset('js/stock_adjustment.js?v=' . $asset_v) }}"></script>

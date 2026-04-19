@@ -18,22 +18,22 @@
 		</div>
 
 		<div class="text_div">
-			<small class="text text-muted">{{$product->name}} 
+			<div class="vp-pos-product-title">{{ $product->name }}
 			@if($product->type == 'variable')
-				- {{$product->variation}}
+				<span class="vp-pos-product-var"> — {{ $product->variation }}</span>
 			@endif
-			</small>
-
-			<small class="text-muted">
-				({{$product->sub_sku}})
-			</small><br>
-			<small class="text-muted" style="font-size: 60%;">
+			</div>
+			<div class="vp-pos-product-price">@format_currency($product->selling_price)</div>
+			<div class="vp-pos-product-meta text-muted">
+				<span class="vp-pos-product-sku">({{ $product->sub_sku }})</span>
+				<span class="vp-pos-product-stock">
 				@if($product->enable_stock)
-				{{ @num_format($product->qty_available) }} {{$product->unit}} @lang('lang_v1.in_stock')
+					{{ @num_format($product->qty_available) }} {{ $product->unit }} @lang('lang_v1.in_stock')
 				@else
-					--
+					&mdash;
 				@endif
-			</small>
+				</span>
+			</div>
 		</div>
 			
 		</div>

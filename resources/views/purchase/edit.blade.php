@@ -3,16 +3,25 @@
 
 @section('content')
 
+<div class="vp-vendo-page-wrap">
 @php
   $custom_labels = json_decode(session('business.custom_labels'), true);
 @endphp
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('purchase.edit_purchase') <i class="fa fa-keyboard-o hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@include('purchase.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i></h1>
-</section>
+    <div class="vp-vendo-form-page-head">
+        <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'index']) }}" class="vp-vendo-form-back"
+            aria-label="{{ __('purchase.list_purchase') }}">
+            <img src="{{ asset('images/dashboard-icons/sales-back.png') }}" alt="">
+        </a>
+        <div class="vp-vendo-form-head-main">
+            <h1 class="vp-vendo-form-title tw-inline-flex tw-items-center tw-gap-2 tw-flex-wrap">
+                @lang('purchase.edit_purchase')
+                <i class="fa fa-keyboard-o hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@include('purchase.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i>
+            </h1>
+        </div>
+    </div>
 
 <!-- Main content -->
-<section class="content">
+<section class="content vp-vendo-form-content">
 
   <!-- Page level currency setting -->
   <input type="hidden" id="p_code" value="{{$currency_details->code}}">
@@ -533,6 +542,7 @@
   @include('contact.create', ['quick_add' => true])
 </div>
 @include('purchase.partials.import_purchase_products_modal')
+</div>
 @endsection
 
 @section('javascript')

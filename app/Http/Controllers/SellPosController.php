@@ -216,9 +216,45 @@ class SellPosController extends Controller
         }
 
         //If brands, category are enabled then send else false.
+        $pos_all_category_product_count = null;
         $categories = (request()->session()->get('business.enable_category') == 1) ? Category::catAndSubCategories($business_id) : false;
         $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)
             ->prepend(__('lang_v1.all_brands'), 'all') : false;
+
+        if (is_array($categories) && ! empty($categories) && ! empty($default_location->id)) {
+            $location_id = (int) $default_location->id;
+
+            $pos_all_category_product_count = (int) DB::table('products')
+                ->join('product_locations as pl', 'pl.product_id', '=', 'products.id')
+                ->where('products.business_id', $business_id)
+                ->where('products.is_inactive', 0)
+                ->where('products.not_for_selling', 0)
+                ->where('pl.location_id', $location_id)
+                ->select(DB::raw('COUNT(DISTINCT products.id) as agg'))
+                ->value('agg');
+
+            foreach ($categories as $idx => $category) {
+                $subIds = [];
+                if (! empty($category['sub_categories'])) {
+                    $subIds = array_column($category['sub_categories'], 'id');
+                }
+
+                $categories[$idx]['product_count'] = (int) DB::table('products')
+                    ->join('product_locations as pl', 'pl.product_id', '=', 'products.id')
+                    ->where('products.business_id', $business_id)
+                    ->where('products.is_inactive', 0)
+                    ->where('products.not_for_selling', 0)
+                    ->where('pl.location_id', $location_id)
+                    ->where(function ($q) use ($category, $subIds) {
+                        $q->where('products.category_id', $category['id']);
+                        if (! empty($subIds)) {
+                            $q->orWhereIn('products.sub_category_id', $subIds);
+                        }
+                    })
+                    ->select(DB::raw('COUNT(DISTINCT products.id) as agg'))
+                    ->value('agg');
+            }
+        }
 
         $change_return = $this->dummyPaymentLine;
 
@@ -294,6 +330,7 @@ class SellPosController extends Controller
                 'default_invoice_schemes',
                 'invoice_layouts',
                 'users',
+                'pos_all_category_product_count',
             ));
     }
 
@@ -1047,9 +1084,45 @@ class SellPosController extends Controller
         }
 
         //If brands, category are enabled then send else false.
+        $pos_all_category_product_count = null;
         $categories = (request()->session()->get('business.enable_category') == 1) ? Category::catAndSubCategories($business_id) : false;
         $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)
             ->prepend(__('lang_v1.all_brands'), 'all') : false;
+
+        if (is_array($categories) && ! empty($categories) && ! empty($transaction->location_id)) {
+            $location_id = (int) $transaction->location_id;
+
+            $pos_all_category_product_count = (int) DB::table('products')
+                ->join('product_locations as pl', 'pl.product_id', '=', 'products.id')
+                ->where('products.business_id', $business_id)
+                ->where('products.is_inactive', 0)
+                ->where('products.not_for_selling', 0)
+                ->where('pl.location_id', $location_id)
+                ->select(DB::raw('COUNT(DISTINCT products.id) as agg'))
+                ->value('agg');
+
+            foreach ($categories as $idx => $category) {
+                $subIds = [];
+                if (! empty($category['sub_categories'])) {
+                    $subIds = array_column($category['sub_categories'], 'id');
+                }
+
+                $categories[$idx]['product_count'] = (int) DB::table('products')
+                    ->join('product_locations as pl', 'pl.product_id', '=', 'products.id')
+                    ->where('products.business_id', $business_id)
+                    ->where('products.is_inactive', 0)
+                    ->where('products.not_for_selling', 0)
+                    ->where('pl.location_id', $location_id)
+                    ->where(function ($q) use ($category, $subIds) {
+                        $q->where('products.category_id', $category['id']);
+                        if (! empty($subIds)) {
+                            $q->orWhereIn('products.sub_category_id', $subIds);
+                        }
+                    })
+                    ->select(DB::raw('COUNT(DISTINCT products.id) as agg'))
+                    ->value('agg');
+            }
+        }
 
         $change_return = $this->dummyPaymentLine;
 
@@ -1119,7 +1192,7 @@ class SellPosController extends Controller
                 'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
                 'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
                 'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-                'users', 'only_payment'));
+                'users', 'only_payment', 'pos_all_category_product_count'));
     }
 
     /**

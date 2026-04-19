@@ -555,7 +555,7 @@ $(document).ready(function() {
     });
 
     //Purchase table
-    purchase_table = $('#purchase_table').DataTable({
+    var _purchase_table_opts = {
         processing: true,
         serverSide: true,
         fixedHeader:false,
@@ -616,6 +616,14 @@ $(document).ready(function() {
         ],
         fnDrawCallback: function(oSettings) {
             __currency_convert_recursively($('#purchase_table'));
+            if (typeof window.__vpPurchasesMoveLayout === 'function') {
+                window.__vpPurchasesMoveLayout();
+            }
+        },
+        initComplete: function() {
+            if (typeof window.__vpPurchasesMoveLayout === 'function') {
+                window.__vpPurchasesMoveLayout();
+            }
         },
         "footerCallback": function ( row, data, start, end, display ) {
             var total_purchase = 0;
@@ -643,7 +651,11 @@ $(document).ready(function() {
                 .find('td:eq(5)')
                 .attr('class', 'clickable_td');
         },
-    });
+    };
+    if (typeof window.__vpPurchasesDataTableOverrides !== 'undefined' && window.__vpPurchasesDataTableOverrides !== null) {
+        $.extend(true, _purchase_table_opts, window.__vpPurchasesDataTableOverrides);
+    }
+    purchase_table = $('#purchase_table').DataTable(_purchase_table_opts);
 
     $(document).on(
         'change',

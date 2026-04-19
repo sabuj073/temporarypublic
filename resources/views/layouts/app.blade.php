@@ -14,14 +14,31 @@
 
 @php
     $whitelist = ['127.0.0.1', '::1'];
+    $vp_users_vendo_page = $request->path() === 'users';
+    $vp_purchases_vendo_page = $request->path() === 'purchases';
+    $vp_stock_transfer_vendo_page = $request->path() === 'stock-transfers';
+    $vp_stock_adjustment_vendo_page = $request->path() === 'stock-adjustments';
+    $vp_expenses_vendo_page = $request->path() === 'expenses';
+    $vp_profit_loss_vendo_page = $request->path() === 'reports/profit-loss';
+    $vp_business_settings_vendo_page = $request->path() === 'business/settings';
+    $vp_path = $request->path();
+    $vp_vendo_scroll_shell = \Illuminate\Support\Str::startsWith($vp_path, 'products')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'expenses')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'purchases')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'users')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'contacts')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'stock-transfers')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'stock-adjustments')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'sells');
     $is_home_dashboard = $request->segment(1) == 'home' && empty($request->segment(2));
     $global_dashboard_bg = file_exists(public_path('images/49ec31f1f87aef66d6806918046454b221e3915a.jpg'))
         ? asset('images/49ec31f1f87aef66d6806918046454b221e3915a.jpg')
         : null;
+    $adminlte_skin_class = 'skin-' . (!empty(session('business.theme_color')) ? session('business.theme_color') : 'blue-light');
 @endphp
 
 <!DOCTYPE html>
-<html class="tw-bg-white tw-scroll-smooth" lang="{{ app()->getLocale() }}"
+<html class="tw-bg-white tw-scroll-smooth {{ $vp_vendo_scroll_shell ? 'vp-vendo-scroll-shell-html' : '' }}" lang="{{ app()->getLocale() }}"
     dir="{{ in_array(session()->get('user.language', config('app.locale')), config('constants.langs_rtl')) ? 'rtl' : 'ltr' }}">
 <head>
     <!-- Tell the browser to be responsive to screen width -->
@@ -38,11 +55,70 @@
 
     @include('layouts.partials.extracss')
 
+    @if ($pos_layout)
+        <style id="vp-pos-page-surface">
+            body.vp-pos-page {
+                background-color: #24255b !important;
+                @if (!empty($global_dashboard_bg))
+                    background-image:
+                        linear-gradient(0deg, rgba(36, 37, 91, 0.8), rgba(36, 37, 91, 0.8)),
+                        url('{{ $global_dashboard_bg }}') !important;
+                    background-size: cover !important;
+                    background-position: center center !important;
+                    background-repeat: no-repeat !important;
+                    background-attachment: fixed !important;
+                @else
+                    background-image: linear-gradient(120deg, #1c2a62 0%, #242f70 55%, #2a377f 100%) !important;
+                @endif
+            }
+
+            body.vp-pos-page .thetop,
+            body.vp-pos-page .thetop main,
+            body.vp-pos-page #scrollable-container {
+                background: transparent !important;
+            }
+
+            body.vp-pos-page .vp-pos-secondary-toolbar {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                border: 0 !important;
+            }
+
+            /* Keep POS in one viewport: header + scroll area must not exceed 100vh */
+            body.vp-pos-page .thetop {
+                min-height: 100vh;
+                max-height: 100vh;
+                overflow: hidden;
+                flex-direction: column !important;
+            }
+
+            body.vp-pos-page .thetop > main {
+                min-height: 0;
+                flex: 1 1 auto;
+                height: auto !important;
+                max-height: 100%;
+                overflow: hidden;
+            }
+
+            body.vp-pos-page #scrollable-container {
+                height: auto !important;
+                min-height: 0 !important;
+                flex: 1 1 auto !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+            }
+        </style>
+    @endif
+
     @yield('css')
 
 </head>
 <body
-    class="tw-font-sans tw-antialiased tw-text-gray-900 tw-bg-gray-100 {{ $is_home_dashboard ? 'vp-home-dashboard' : '' }} @if ($pos_layout) hold-transition lockscreen @else hold-transition skin-@if (!empty(session('business.theme_color'))){{ session('business.theme_color') }}@else{{ 'blue-light' }} @endif sidebar-mini @endif" >
+    class="tw-font-sans tw-antialiased tw-text-gray-900 tw-bg-gray-100 {{ $is_home_dashboard ? 'vp-home-dashboard' : '' }} {{ $vp_users_vendo_page ? 'vp-users-vendo-page' : '' }} {{ $vp_purchases_vendo_page ? 'vp-purchases-vendo-page' : '' }} {{ $vp_stock_transfer_vendo_page ? 'vp-stock-transfer-vendo-page' : '' }} {{ $vp_stock_adjustment_vendo_page ? 'vp-stock-adjustment-vendo-page' : '' }} {{ $vp_expenses_vendo_page ? 'vp-expenses-vendo-page' : '' }} {{ $vp_profit_loss_vendo_page ? 'vp-profit-loss-vendo-page' : '' }} {{ $vp_business_settings_vendo_page ? 'vp-business-settings-vendo-page' : '' }} {{ $vp_vendo_scroll_shell ? 'vp-vendo-scroll-shell' : '' }} @if ($pos_layout) hold-transition lockscreen vp-pos-page {{ $adminlte_skin_class }} @else hold-transition {{ $adminlte_skin_class }} sidebar-mini @endif" >
     <div class="tw-flex thetop">
         <script type="text/javascript">
             if (localStorage.getItem("upos_sidebar_collapse") == 'true') {
@@ -81,6 +157,7 @@
             @if($request->segment(1) != 'customer-display' && !$pos_layout)
                 @include('layouts.partials.header')
             @elseif($request->segment(1) != 'customer-display' && $pos_layout)
+                @include('layouts.partials.header')
                 @include('layouts.partials.header-pos')
             @endif
             <!-- empty div for vuejs -->
@@ -89,10 +166,8 @@
             </div>
             <div class="tw-flex-1 tw-overflow-y-auto tw-h-screen" id="scrollable-container">
                 @yield('content')
-                @if (!$pos_layout && !$is_home_dashboard)
+                @if (!$pos_layout && !$is_home_dashboard && !$vp_vendo_scroll_shell && !$vp_profit_loss_vendo_page && !$vp_business_settings_vendo_page)
                     @include('layouts.partials.footer')
-                @elseif($pos_layout)
-                    @include('layouts.partials.footer_pos')
                 @endif
             </div>
             <div class='scrolltop no-print'>
@@ -164,7 +239,7 @@
 
     .thetop,
     .thetop main,
-    #scrollable-container {
+    body:not(.vp-vendo-scroll-shell) #scrollable-container {
         background: transparent !important;
     }
 
@@ -181,6 +256,10 @@
         }
     }
 </style>
+@if (!empty($vp_vendo_scroll_shell))
+    @include('layouts.partials.vendo_scroll_shell_page_styles')
+    @include('layouts.partials.vendo_form_shell_wrap_styles')
+@endif
 <style>
     .side-bar.small-view-side-active:not(.vp-custom-sidebar) {
         display: grid !important;

@@ -1,74 +1,68 @@
 @extends('layouts.app')
 @section('title', __('report.profit_loss'))
 
+@section('css')
+    @include('report.partials.vendo_profit_loss_page_styles')
+@endsection
+
 @section('content')
+    <div class="print_section">
+        <h2>{{ session()->get('business.name') }} - @lang('report.profit_loss')</h2>
+    </div>
 
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('report.profit_loss')
-        </h1>
-    </section>
-
-    <!-- Main content -->
-    <section class="content">
-        <div class="print_section">
-            <h2>{{ session()->get('business.name') }} - @lang('report.profit_loss')</h2>
-        </div>
-
-        <div class="row no-print">
-            <div class="col-md-4 col-xs-12">
-                <div class="input-group">
-                    <span class="input-group-addon bg-light-blue"><i class="fa fa-map-marker"></i></span>
-                    <select class="form-control select2" id="profit_loss_location_filter">
-                        @foreach ($business_locations as $key => $value)
-                            <option value="{{ $key }}">{{ $value }}</option>
-                        @endforeach
-                    </select>
-                </div>
+    <div class="vp-profit-loss-page-wrap no-print">
+        <div class="vp-profit-loss-shell">
+            <div class="vp-profit-loss-page-head">
+                <button type="button" class="vp-profit-loss-back" id="vp_profit_loss_back_btn"
+                    title="{{ __('messages.go_back') }}" aria-label="{{ __('messages.go_back') }}">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <h1 class="vp-profit-loss-page-title">@lang('report.profit_loss')</h1>
             </div>
-        
-            <div class="col-md-4 col-xs-12">
-                <div class="form-group">
-                    <div class="input-group">
-                        <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="profit_loss_date_filter">
-                            <span>
-                                <i class="fa fa-calendar"></i> {{ __('messages.filter_by_date') }}
-                            </span>
-                            <i class="fa fa-caret-down"></i>
-                        </button>
+
+            <div class="vp-profit-loss-card">
+                <div class="vp-profit-loss-toolbar">
+                    <div class="vp-profit-loss-toolbar-main">
+                        <div class="vp-profit-loss-filter-field">
+                            <label for="profit_loss_date_filter">@lang('report.date_range')</label>
+                            <button type="button" class="vp-profit-loss-date-btn" id="profit_loss_date_filter">
+                                <span>
+                                    <i class="fa fa-calendar" aria-hidden="true"></i> {{ __('messages.filter_by_date') }}
+                                </span>
+                                <i class="fa fa-caret-down" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="vp-profit-loss-filter-field">
+                            <label for="profit_loss_location_filter">@lang('business.location')</label>
+                            <select class="form-control select2" id="profit_loss_location_filter" style="width:100%">
+                                @foreach ($business_locations as $key => $value)
+                                    <option value="{{ $key }}">{{ $value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="vp-profit-loss-filter-field" style="flex: 2 1 240px;">
+                            <label class="tw-sr-only">AI</label>
+                            <div id="ai-analysis-container" class="ai-analysis-content"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="vp-profit-loss-print-btn" aria-label="@lang('messages.print')"
+                        onclick="window.print();">
+                        <i class="fa fa-print" aria-hidden="true"></i>
+                        @lang('messages.print')
+                    </button>
+                </div>
+
+                <div class="vp-profit-loss-pl-body">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div id="pl_data_div"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4 col-xs-12">
-                <div id="ai-analysis-container" class="ai-analysis-content"></div>
-            </div>
-        </div>
-        <div class="row">
-            <div id="pl_data_div">
-            </div>
-        </div>
 
-
-        <div class="row no-print">
-            <div class="col-sm-12 tw-mb-2">
-                <button class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right" aria-label="Print"
-                    onclick="window.print();">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-printer">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" />
-                        <path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" />
-                        <path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" />
-                    </svg> @lang('messages.print')
-                </button>
-            </div>
-        </div>
-        <div class="row no-print">
-            <div class="col-md-12">
-                <!-- Custom Tabs -->
-                <div class="nav-tabs-custom">
-                    <ul class="nav nav-tabs">
+                <div class="vp-profit-loss-tabs-wrap">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs vp-pl-nav-tabs">
                         <li class="active">
                             <a href="#profit_by_products" data-toggle="tab" aria-expanded="true"><i class="fa fa-cubes"
                                     aria-hidden="true"></i> @lang('lang_v1.profit_by_products')</a>
@@ -112,7 +106,7 @@
                         </li>
                     </ul>
 
-                    <div class="tab-content">
+                    <div class="tab-content vp-pl-tab-content">
                         <div class="tab-pane active" id="profit_by_products">
                             @include('report.partials.profit_by_products')
                         </div>
@@ -151,20 +145,57 @@
                 </div>
             </div>
         </div>
-
-
-    </section>
-    <!-- /.content -->
+    </div>
 @stop
 @section('javascript')
+    <script>
+        window.vpPlMoveDtControls = function(tableNode) {
+            var $table = $(tableNode);
+            if (!$table.length || !$('.vp-profit-loss-page-wrap').length) {
+                return;
+            }
+            var $w = $table.closest('.dataTables_wrapper');
+            if (!$w.length) {
+                return;
+            }
+            var $pane = $table.closest('.tab-pane');
+            var $fSlot = $pane.find('.vp-pl-filter-slot').first();
+            if (!$fSlot.length) {
+                return;
+            }
+            $w.find('.dataTables_filter').appendTo($fSlot);
+            $w.find('.dataTables_length').appendTo($pane.find('.vp-pl-length-slot').first());
+            $w.find('.dataTables_info').appendTo($pane.find('.vp-pl-info-slot').first());
+            $w.find('.dataTables_paginate').appendTo($pane.find('.vp-pl-paginate-slot').first());
+            $w.find('.row.margin-bottom-20').first().hide();
+        };
+    </script>
     <script src="{{ asset('js/report.js?v=' . $asset_v) }}"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
+            $('#vp_profit_loss_back_btn').on('click', function() {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.assign('{{ action([\App\Http\Controllers\HomeController::class, 'index']) }}');
+                }
+            });
+
             profit_by_products_table = $('#profit_by_products_table').DataTable({
                 processing: true,
                 serverSide: true,
                 fixedHeader:false,
+                initComplete: function() {
+                    if (typeof window.vpPlMoveDtControls === 'function') {
+                        window.vpPlMoveDtControls($(this.api().table().node()));
+                    }
+                },
+                fnDrawCallback: function() {
+                    if (typeof window.vpPlMoveDtControls === 'function') {
+                        window.vpPlMoveDtControls($(this.api().table().node()));
+                    }
+                },
                 "ajax": {
                     "url": "/reports/get-profit/product",
                     "data": function(d) {
@@ -206,6 +237,16 @@
                             processing: true,
                             serverSide: true,
                             fixedHeader:false,
+                            initComplete: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
+                            fnDrawCallback: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
                             "ajax": {
                                 "url": "/reports/get-profit/category",
                                 "data": function(d) {
@@ -248,6 +289,16 @@
                             processing: true,
                             serverSide: true,
                             fixedHeader:false,
+                            initComplete: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
+                            fnDrawCallback: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
                             "ajax": {
                                 "url": "/reports/get-profit/brand",
                                 "data": function(d) {
@@ -290,6 +341,16 @@
                             processing: true,
                             serverSide: true,
                             fixedHeader:false,
+                            initComplete: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
+                            fnDrawCallback: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
                             "ajax": {
                                 "url": "/reports/get-profit/location",
                                 "data": function(d) {
@@ -332,6 +393,16 @@
                             processing: true,
                             serverSide: true,
                             fixedHeader:false,
+                            initComplete: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
+                            fnDrawCallback: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
                             "ajax": {
                                 "url": "/reports/get-profit/invoice",
                                 "data": function(d) {
@@ -374,6 +445,16 @@
                             processing: true,
                             serverSide: true,
                             fixedHeader:false,
+                            initComplete: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
+                            fnDrawCallback: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
                             "ajax": {
                                 "url": "/reports/get-profit/date",
                                 "data": function(d) {
@@ -416,6 +497,16 @@
                             processing: true,
                             serverSide: true,
                             fixedHeader:false,
+                            initComplete: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
+                            fnDrawCallback: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
                             "ajax": {
                                 "url": "/reports/get-profit/customer",
                                 "data": function(d) {
@@ -459,6 +550,16 @@
                             processing: true,
                             serverSide: true,
                             fixedHeader:false,
+                            initComplete: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
+                            fnDrawCallback: function() {
+                                if (typeof window.vpPlMoveDtControls === 'function') {
+                                    window.vpPlMoveDtControls($(this.api().table().node()));
+                                }
+                            },
                             "ajax": {
                                 "url": "/reports/get-profit/service_staff",
                                 "data": function(d) {
@@ -516,6 +617,16 @@
                                 "searching": false,
                                 'paging': false,
                                 'ordering': false,
+                                initComplete: function() {
+                                    if (typeof window.vpPlMoveDtControls === 'function') {
+                                        window.vpPlMoveDtControls($(this.api().table().node()));
+                                    }
+                                },
+                                fnDrawCallback: function() {
+                                    if (typeof window.vpPlMoveDtControls === 'function') {
+                                        window.vpPlMoveDtControls($(this.api().table().node()));
+                                    }
+                                },
                             });
                             var total_profit = sum_table_col($('#profit_by_day_table'),
                                 'gross-profit');
@@ -526,6 +637,18 @@
                 } else if (target == '#profit_by_products') {
                     profit_by_products_table.ajax.reload();
                 }
+                setTimeout(function() {
+                    if (typeof window.vpPlMoveDtControls !== 'function') {
+                        return;
+                    }
+                    var $pane = $(target);
+                    if ($pane.length) {
+                        var $t = $pane.find('table[id]').first();
+                        if ($t.length) {
+                            window.vpPlMoveDtControls($t.get(0));
+                        }
+                    }
+                }, 120);
                 $("a.btn").removeClass("btn btn-default buttons-excel buttons-html5");
             });
         });

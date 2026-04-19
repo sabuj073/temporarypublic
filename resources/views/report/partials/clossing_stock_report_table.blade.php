@@ -1,4 +1,4 @@
-<table class="table table-striped">
+<table class="table table-striped vp-pl-metric-table">
     <tr>
         <th>{{ __('report.closing_stock') }} <br><small class="text-muted">(@lang('lang_v1.by_purchase_price'))</small>:</th>
         <td>

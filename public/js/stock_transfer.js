@@ -133,98 +133,115 @@ $(document).ready(function() {
         }
     });
 
-    stock_transfer_table = $('#stock_transfer_table').DataTable({
-        processing: true,
-        serverSide: true,
-        fixedHeader:false,
-        aaSorting: [[0, 'desc']],
-        ajax: '/stock-transfers',
-        columnDefs: [
-            {
-                targets: 8,
-                orderable: false,
-                searchable: false,
+    if ($('#stock_transfer_table').length) {
+        var _stock_transfer_table_opts = {
+            processing: true,
+            serverSide: true,
+            fixedHeader:false,
+            aaSorting: [[0, 'desc']],
+            ajax: '/stock-transfers',
+            columnDefs: [
+                {
+                    targets: 8,
+                    orderable: false,
+                    searchable: false,
+                },
+            ],
+            columns: [
+                { data: 'transaction_date', name: 'transaction_date' },
+                { data: 'ref_no', name: 'ref_no' },
+                { data: 'location_from', name: 'l1.name' },
+                { data: 'location_to', name: 'l2.name' },
+                { data: 'status', name: 'status' },
+                { data: 'shipping_charges', name: 'shipping_charges' },
+                { data: 'final_total', name: 'final_total' },
+                { data: 'additional_notes', name: 'additional_notes' },
+                { data: 'action', name: 'action' },
+            ],
+            fnDrawCallback: function(oSettings) {
+                __currency_convert_recursively($('#stock_transfer_table'));
+                if (typeof window.__vpStockTransferMoveLayout === 'function') {
+                    window.__vpStockTransferMoveLayout();
+                }
             },
-        ],
-        columns: [
-            { data: 'transaction_date', name: 'transaction_date' },
-            { data: 'ref_no', name: 'ref_no' },
-            { data: 'location_from', name: 'l1.name' },
-            { data: 'location_to', name: 'l2.name' },
-            { data: 'status', name: 'status' },
-            { data: 'shipping_charges', name: 'shipping_charges' },
-            { data: 'final_total', name: 'final_total' },
-            { data: 'additional_notes', name: 'additional_notes' },
-            { data: 'action', name: 'action' },
-        ],
-        fnDrawCallback: function(oSettings) {
-            __currency_convert_recursively($('#stock_transfer_table'));
-        },
-    });
-    var detailRows = [];
-
-    $('#stock_transfer_table tbody').on('click', '.view_stock_transfer', function() {
-        var tr = $(this).closest('tr');
-        var row = stock_transfer_table.row(tr);
-        var idx = $.inArray(tr.attr('id'), detailRows);
-
-        if (row.child.isShown()) {
-            $(this)
-                .find('i')
-                .removeClass('fa-eye')
-                .addClass('fa-eye-slash');
-            row.child.hide();
-
-            // Remove from the 'open' array
-            detailRows.splice(idx, 1);
-        } else {
-            $(this)
-                .find('i')
-                .removeClass('fa-eye-slash')
-                .addClass('fa-eye');
-
-            row.child(get_stock_transfer_details(row.data())).show();
-
-            // Add to the 'open' array
-            if (idx === -1) {
-                detailRows.push(tr.attr('id'));
-            }
+            initComplete: function() {
+                if (typeof window.__vpStockTransferMoveLayout === 'function') {
+                    window.__vpStockTransferMoveLayout();
+                }
+            },
+        };
+        if (typeof window.__vpStockTransferDataTableOverrides !== 'undefined' && window.__vpStockTransferDataTableOverrides !== null) {
+            $.extend(true, _stock_transfer_table_opts, window.__vpStockTransferDataTableOverrides);
         }
-    });
+        stock_transfer_table = $('#stock_transfer_table').DataTable(_stock_transfer_table_opts);
+        var detailRows = [];
 
-    // On each draw, loop over the `detailRows` array and show any child rows
-    stock_transfer_table.on('draw', function() {
-        $.each(detailRows, function(i, id) {
-            $('#' + id + ' .view_stock_transfer').trigger('click');
-        });
-    });
+        $('#stock_transfer_table tbody').on('click', '.view_stock_transfer', function() {
+            var tr = $(this).closest('tr');
+            var row = stock_transfer_table.row(tr);
+            var idx = $.inArray(tr.attr('id'), detailRows);
 
-    //Delete Stock Transfer
-    $(document).on('click', 'button.delete_stock_transfer', function() {
-        swal({
-            title: LANG.sure,
-            icon: 'warning',
-            buttons: true,
-            dangerMode: true,
-        }).then(willDelete => {
-            if (willDelete) {
-                var href = $(this).data('href');
-                $.ajax({
-                    method: 'DELETE',
-                    url: href,
-                    dataType: 'json',
-                    success: function(result) {
-                        if (result.success) {
-                            toastr.success(result.msg);
-                            stock_transfer_table.ajax.reload();
-                        } else {
-                            toastr.error(result.msg);
-                        }
-                    },
-                });
+            if (row.child.isShown()) {
+                $(this)
+                    .find('i')
+                    .removeClass('fa-eye')
+                    .addClass('fa-eye-slash');
+                row.child.hide();
+
+                // Remove from the 'open' array
+                detailRows.splice(idx, 1);
+            } else {
+                $(this)
+                    .find('i')
+                    .removeClass('fa-eye-slash')
+                    .addClass('fa-eye');
+
+                row.child(get_stock_transfer_details(row.data())).show();
+
+                // Add to the 'open' array
+                if (idx === -1) {
+                    detailRows.push(tr.attr('id'));
+                }
             }
         });
-    });
+
+        // On each draw, loop over the `detailRows` array and show any child rows
+        stock_transfer_table.on('draw', function() {
+            $.each(detailRows, function(i, id) {
+                $('#' + id + ' .view_stock_transfer').trigger('click');
+            });
+        });
+
+        //Delete Stock Transfer
+        $(document).on('click', 'button.delete_stock_transfer', function() {
+            var $delBtn = $(this);
+            swal({
+                title: LANG.sure,
+                icon: 'warning',
+                buttons: true,
+                dangerMode: true,
+            }).then(willDelete => {
+                if (willDelete) {
+                    var href = $delBtn.data('href');
+                    $.ajax({
+                        method: 'DELETE',
+                        url: href,
+                        dataType: 'json',
+                        success: function(result) {
+                            if (result.success) {
+                                toastr.success(result.msg);
+                                if (typeof stock_transfer_table !== 'undefined' && stock_transfer_table) {
+                                    stock_transfer_table.ajax.reload();
+                                }
+                            } else {
+                                toastr.error(result.msg);
+                            }
+                        },
+                    });
+                }
+            });
+        });
+    }
 });
 
 function stock_transfer_product_row(variation_id) {
@@ -386,7 +403,9 @@ $(document).on('submit', '#update_stock_transfer_status_form', function(e) {
             if (result.success == true) {
                 $('div#update_stock_transfer_status_modal').modal('hide');
                 toastr.success(result.msg);
-                stock_transfer_table.ajax.reload();
+                if (typeof stock_transfer_table !== 'undefined' && stock_transfer_table) {
+                    stock_transfer_table.ajax.reload();
+                }
             } else {
                 toastr.error(result.msg);
             }
