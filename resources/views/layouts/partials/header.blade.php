@@ -144,6 +144,8 @@
         border-radius: 10px;
         background: linear-gradient(90deg, rgba(24, 35, 80, 0.95) 0%, rgba(35, 49, 105, 0.95) 100%);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        max-width: calc(100vw - 52px);
+        box-sizing: border-box;
     }
 
     body.vp-home-dashboard .vp-global-header {
@@ -156,6 +158,10 @@
         justify-content: space-between;
         gap: 12px;
         flex-wrap: nowrap;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .vp-global-left,
@@ -163,18 +169,19 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        flex-wrap: wrap;
         min-width: 0;
     }
 
     .vp-global-left {
-        flex: 1 1 auto;
+        flex: 1 1 0;
+        min-width: 0;
         flex-wrap: nowrap;
     }
 
     .vp-global-right {
-        flex: 0 1 auto;
+        flex: 0 0 auto;
         justify-content: flex-end;
+        flex-wrap: nowrap;
     }
 
     .vp-side-btn {
@@ -197,7 +204,8 @@
     }
 
     .vp-global-logo-wrap {
-        width: 186px;
+        width: min(186px, 22vw);
+        min-width: 120px;
         min-height: 40px;
         display: inline-flex;
         align-items: center;
@@ -205,6 +213,7 @@
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.09);
         padding: 4px 10px;
+        flex-shrink: 1;
     }
 
     .vp-global-logo-image {
@@ -254,17 +263,25 @@
 
     .vp-global-select-location {
         padding-left: 38px !important;
-        min-width: 220px;
-        width: 220px;
+        min-width: 0;
+        width: min(220px, 28vw);
         max-width: 220px;
     }
 
     .vp-global-location-pill {
         gap: 8px;
-        min-width: 220px;
+        min-width: 0;
+        width: min(220px, 28vw);
         max-width: 220px;
         justify-content: flex-start;
         overflow: hidden;
+    }
+
+    .vp-global-location-pill > span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .vp-global-location-icon-image {
@@ -446,6 +463,7 @@
         .vp-global-header {
             margin: 16px 16px 0;
             padding: 8px 10px;
+            max-width: calc(100vw - 32px);
         }
 
         body.vp-home-dashboard .vp-global-header {
@@ -476,12 +494,13 @@
 
         .vp-global-select-location,
         .vp-global-location-pill {
-            min-width: 180px;
+            min-width: 0;
+            width: min(180px, 32vw);
             max-width: 180px;
         }
 
         .vp-global-select-location {
-            width: 180px;
+            width: min(180px, 32vw);
         }
 
         .vp-global-nav {
@@ -526,7 +545,12 @@
         }
     }
 
-    @media (max-width: 1280px) {
+    @media (max-width: 768px) {
+        .vp-global-header {
+            margin: 14px 12px 0;
+            max-width: calc(100vw - 24px);
+        }
+
         .vp-global-inner {
             flex-wrap: wrap;
             align-items: stretch;
@@ -548,17 +572,12 @@
         }
 
         .vp-admin-menu {
-            margin-left: 8px;
+            margin-left: auto;
         }
 
         .vp-admin-menu summary {
-            max-width: 240px;
-        }
-    }
-
-    @media (max-width: 1024px) {
-        .vp-global-inner {
-            flex-wrap: wrap;
+            min-width: 0;
+            max-width: min(240px, 55vw);
         }
 
         .vp-global-nav-link {
@@ -567,39 +586,12 @@
             font-size: 14px;
         }
 
-        .vp-admin-menu summary {
-            min-width: 220px;
-        }
-
         .vp-admin-text strong {
             font-size: 16px;
         }
 
         .vp-admin-text small {
             font-size: 13px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .vp-global-header {
-            margin: 14px 12px 0;
-        }
-
-        .vp-global-inner {
-            align-items: flex-start;
-        }
-
-        .vp-global-right {
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .vp-global-nav {
-            flex: 1;
-        }
-
-        .vp-admin-menu {
-            margin-left: auto;
         }
     }
 </style>

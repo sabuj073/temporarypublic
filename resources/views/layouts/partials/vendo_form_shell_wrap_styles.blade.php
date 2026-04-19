@@ -58,6 +58,28 @@
         color: rgba(248, 250, 252, 0.92) !important;
     }
 
+    .vp-vendo-form-page-head--with-actions {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .vp-vendo-form-head-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    .vp-vendo-form-subtitle {
+        margin: 6px 0 0;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.35;
+        color: rgba(248, 250, 252, 0.88);
+    }
+
     .vp-vendo-page-wrap > .content-header {
         background: transparent;
         border: none;
@@ -149,6 +171,14 @@
     .vp-vendo-form-content .payment_row > .row > .clearfix,
     .vp-vendo-form-content .payment_row .row > .clearfix {
         display: block !important;
+    }
+
+    @media (max-width: 768px) {
+        .vp-vendo-form-page-head--with-actions .vp-vendo-form-head-actions {
+            width: 100%;
+            margin-left: 0;
+            padding-left: 48px;
+        }
     }
 
     @media (max-width: 991px) {

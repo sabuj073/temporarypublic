@@ -6,11 +6,13 @@
 
         <!-- Content Header (Page header) -->
         <section class="content-header no-print vp-sales-header">
-            <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
-                <a href="{{ action([\App\Http\Controllers\HomeController::class, 'index']) }}" class="vp-sales-back-btn" aria-label="Back to home">
-                    <img src="{{ asset('images/dashboard-icons/sales-back.png') }}" alt="Back">
-                </a>
-                @lang('sale.sells')
+            <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black vp-sales-header-title">
+                <span class="vp-sales-header-title-row">
+                    <a href="{{ action([\App\Http\Controllers\HomeController::class, 'index']) }}" class="vp-sales-back-btn" aria-label="Back to home">
+                        <img src="{{ asset('images/dashboard-icons/sales-back.png') }}" alt="Back">
+                    </a>
+                    <span class="vp-sales-title-text">@lang('sale.sells')</span>
+                </span>
                 <span id="sell_list_selected_range" class="tw-text-gray-600 tw-font-normal tw-text-base">
                     {{ @format_date(\Carbon\Carbon::now()->subDays(29)) }} ~ {{ @format_date(\Carbon\Carbon::now()) }}
                 </span>
@@ -173,13 +175,28 @@
             gap: 10px;
         }
 
-        .vp-sales-header h1 {
+        .vp-sales-header h1.vp-sales-header-title {
             color: #fff !important;
             font-size: 34px !important;
             font-weight: 700 !important;
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
+            min-width: 0;
+            row-gap: 10px;
+        }
+
+        .vp-sales-header .vp-sales-header-title-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex-shrink: 0;
+        }
+
+        .vp-sales-header .vp-sales-title-text {
+            white-space: nowrap;
         }
 
         .vp-sales-back-btn {
@@ -203,6 +220,12 @@
         }
 
         .vp-sales-header #sell_list_selected_range {
+            flex: 0 1 auto;
+            max-width: 100%;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             color: rgba(255, 255, 255, 0.9) !important;
             font-size: 14px !important;
             background: rgba(255, 255, 255, 0.1);
@@ -464,7 +487,7 @@
                 padding: 14px;
             }
 
-            .vp-sales-header h1 {
+            .vp-sales-header h1.vp-sales-header-title {
                 font-size: 26px !important;
             }
 

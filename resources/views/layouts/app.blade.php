@@ -29,7 +29,9 @@
         || \Illuminate\Support\Str::startsWith($vp_path, 'contacts')
         || \Illuminate\Support\Str::startsWith($vp_path, 'stock-transfers')
         || \Illuminate\Support\Str::startsWith($vp_path, 'stock-adjustments')
-        || \Illuminate\Support\Str::startsWith($vp_path, 'sells');
+        || \Illuminate\Support\Str::startsWith($vp_path, 'sells')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'manage-modules')
+        || \Illuminate\Support\Str::startsWith($vp_path, 'subscription');
     $is_home_dashboard = $request->segment(1) == 'home' && empty($request->segment(2));
     $global_dashboard_bg = file_exists(public_path('images/49ec31f1f87aef66d6806918046454b221e3915a.jpg'))
         ? asset('images/49ec31f1f87aef66d6806918046454b221e3915a.jpg')
