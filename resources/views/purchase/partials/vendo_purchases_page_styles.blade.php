@@ -1,12 +1,4 @@
 <style id="vp-purchases-vendo-styles">
-    body.vp-purchases-vendo-page aside.side-bar.vp-custom-sidebar {
-        display: none !important;
-    }
-
-    body.vp-purchases-vendo-page .vp-side-btn {
-        display: none !important;
-    }
-
     /*
      * Export actions use position:fixed — they do not need padding on #scrollable-container.
      * Extra padding-bottom here only increased scrollHeight and forced an unnecessary vertical scrollbar.
@@ -123,7 +115,7 @@
         border-radius: 12px;
         border: 1px solid rgba(15, 23, 42, 0.06);
         box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
-        overflow: hidden;
+        overflow: visible;
     }
 
     body.vp-purchases-vendo-page .vp-purchases-card-toolbar {
@@ -219,6 +211,7 @@
         max-width: 100%;
         min-width: 0;
         overflow-x: auto;
+        overflow-y: visible;
     }
 
     body.vp-purchases-vendo-page #purchase_table {

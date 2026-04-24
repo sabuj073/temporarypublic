@@ -459,12 +459,21 @@
             margin-top: 14px;
             display: flex;
             justify-content: center;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            padding: 0 4px;
         }
 
         .vp-sales-export-actions .dt-buttons {
-            display: inline-flex;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             align-items: center;
             gap: 8px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
             background: #fff;
             padding: 8px;
             border-radius: 8px;
@@ -511,6 +520,75 @@
 
             .vp-filter-action {
                 width: 100%;
+            }
+        }
+
+        @media (max-width: 767px) {
+            /* Length + search + Add: stack so row cannot widen the page */
+            .vp-sales-top-actions {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                flex-wrap: nowrap !important;
+                justify-content: flex-start !important;
+                margin-left: 0 !important;
+                gap: 10px !important;
+            }
+
+            .vp-sales-top-actions .box-tools,
+            .vp-sales-top-actions .box-tools .vp-add-btn {
+                width: 100% !important;
+                float: none !important;
+                margin: 0 !important;
+            }
+
+            .vp-sales-top-actions .dataTables_length,
+            .vp-sales-top-actions .dataTables_filter {
+                width: 100% !important;
+            }
+
+            .vp-sales-top-actions .dataTables_filter input {
+                min-width: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            /* Export dock: three buttons per row (Bootstrap DT uses .btn, not .dt-button) */
+            .vp-sales-export-actions .dt-buttons {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 12px !important;
+                padding: 10px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .vp-sales-export-actions .dt-buttons > .btn-group {
+                display: contents !important;
+            }
+
+            .vp-sales-export-actions .dt-buttons > .dt-button,
+            .vp-sales-export-actions .dt-buttons > .btn {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                float: none !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+                text-align: center !important;
+                overflow-wrap: break-word !important;
+            }
+
+            .vp-sales-export-actions .dt-buttons > *:last-child {
+                margin-left: 30px !important;
+            }
+
+            /* Keep wide grid inside the white card, not the viewport */
+            .vp-sales-content .box-body {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                max-width: 100%;
             }
         }
     </style>

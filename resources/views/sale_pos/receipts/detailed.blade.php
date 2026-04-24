@@ -795,12 +795,10 @@
 
                                 <!-- Total -->
                                 <tr>
-                                    <th style="background-color: #357ca5 !important; color: white !important"
-                                        class="font-23 padding-10">
+                                    <th class="font-23 padding-10 vp-receipt-blue-total-cell">
                                         {!! $receipt_details->total_label !!}
                                     </th>
-                                    <td class="text-right font-23 padding-10"
-                                        style="background-color: #357ca5 !important; color: white !important">
+                                    <td class="text-right font-23 padding-10 vp-receipt-blue-total-cell">
                                         {{ $receipt_details->total }}
                                     </td>
                                 </tr>

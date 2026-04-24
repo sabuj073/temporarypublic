@@ -1,6 +1,24 @@
 @extends('layouts.app')
 @section('title', __('lang_v1.payment_accounts'))
 
+@section('css')
+    <style>
+        /* Toolbar: Add sits above the table on mobile (global DataTables toolbar CSS is in layouts/app). */
+        @media (max-width: 767px) {
+            #account_types .account-types-add-wrap {
+                text-align: center;
+                margin-bottom: 12px;
+            }
+
+            #account_types .account-types-add-wrap .btn-modal {
+                float: none !important;
+                width: 100%;
+                max-width: 320px;
+            }
+        }
+    </style>
+@endsection
+
 @section('content')
     <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -54,36 +72,35 @@
                             </ul>
                             <div class="tab-content">
                                 <div class="tab-pane active" id="other_accounts">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            {{-- @component('components.widget') --}}
-                                            <div class="col-md-4">
-                                                {!! Form::select(
-                                                    'account_status',
-                                                    ['active' => __('business.is_active'), 'closed' => __('account.closed')],
-                                                    null,
-                                                    ['class' => 'form-control select2', 'style' => 'width:100%', 'id' => 'account_status'],
-                                                ) !!}
-                                            </div>
-                                            <div class="col-md-8">
-                                                    <button type="button" class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full btn-modal pull-right"
-                                                        data-container=".account_model"
-                                                        data-href="{{ action([\App\Http\Controllers\AccountController::class, 'create']) }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                            class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
-                                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                            <path d="M12 5l0 14" />
-                                                            <path d="M5 12l14 0" />
-                                                        </svg> @lang('messages.add')
-                                                    </button>
-                                            </div>
-                                            {{-- @endcomponent --}}
+                                    <div class="payment-accounts-toolbar tw-mb-3 tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between">
+                                        <div class="tw-w-full md:tw-max-w-xs">
+                                            {!! Form::select(
+                                                'account_status',
+                                                ['active' => __('business.is_active'), 'closed' => __('account.closed')],
+                                                null,
+                                                ['class' => 'form-control select2', 'style' => 'width:100%', 'id' => 'account_status'],
+                                            ) !!}
                                         </div>
+                                        <div class="tw-w-full tw-flex tw-justify-center md:tw-justify-end">
+                                            <button type="button"
+                                                class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full btn-modal tw-inline-flex tw-w-full sm:tw-max-w-xs md:tw-w-auto tw-items-center tw-justify-center tw-gap-2 tw-px-4 tw-py-2.5 tw-text-sm md:tw-text-base"
+                                                data-container=".account_model"
+                                                data-href="{{ action([\App\Http\Controllers\AccountController::class, 'create']) }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <path d="M12 5l0 14" />
+                                                    <path d="M5 12l14 0" />
+                                                </svg> @lang('messages.add')
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-sm-12">
                                             <br>
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-striped" id="other_account_table">
+                                            <div class="table-responsive payment-accounts-table-wrap">
+                                                <table class="table table-bordered table-striped" id="other_account_table" style="width:100%">
                                                     <thead>
                                                         <tr>
                                                             <th>@lang('lang_v1.name')</th>
@@ -126,7 +143,7 @@
                     --}}
                                 <div class="tab-pane" id="account_types">
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-xs-12 account-types-add-wrap">
                                             <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm btn-modal pull-right"
                                                 data-href="{{ action([\App\Http\Controllers\AccountTypeController::class, 'create']) }}"
                                                 data-container="#account_type_modal">
@@ -326,7 +343,9 @@
             other_account_table = $('#other_account_table').DataTable({
                 processing: true,
                 serverSide: true,
-                fixedHeader:false,
+                fixedHeader: false,
+                scrollX: true,
+                autoWidth: false,
                 ajax: {
                     url: '/account/account?account_type=other',
                     data: function(d) {

@@ -1,12 +1,4 @@
 <style id="vp-profit-loss-vendo-styles">
-    body.vp-profit-loss-vendo-page aside.side-bar.vp-custom-sidebar {
-        display: none !important;
-    }
-
-    body.vp-profit-loss-vendo-page .vp-side-btn {
-        display: none !important;
-    }
-
     body.vp-profit-loss-vendo-page #scrollable-container {
         overflow-x: hidden;
         padding-bottom: 0;

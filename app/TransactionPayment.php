@@ -114,4 +114,9 @@ class TransactionPayment extends Model
     {
         return $this->morphMany(\App\CashDenomination::class, 'model');
     }
+
+    public function gift_card()
+    {
+        return $this->belongsTo(\App\GiftCard::class, 'gift_card_id');
+    }
 }

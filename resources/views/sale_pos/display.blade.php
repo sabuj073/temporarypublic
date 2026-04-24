@@ -143,6 +143,28 @@
                                                     <span class="lead text-bold balance_due display_currency text-danger"
                                                         data-currency_symbol="true">0</span>
                                                 </div>
+                                                @if(!isset($pos_settings['customer_display_show_promo_blocks']) || !empty($pos_settings['customer_display_show_promo_blocks']))
+                                                    <div class="col-md-3">
+                                                        <strong>@lang('lang_v1.promotion_code'):</strong>
+                                                        <br />
+                                                        <span class="lead text-bold" id="display_promotion_code">--</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>@lang('lang_v1.promotion_discount'):</strong>
+                                                        <br />
+                                                        <span class="lead text-bold display_currency" data-currency_symbol="true" id="display_promotion_discount">0</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>@lang('lang_v1.redeemed_amount'):</strong>
+                                                        <br />
+                                                        <span class="lead text-bold display_currency" data-currency_symbol="true" id="display_loyalty_redeemed">0</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>@lang('lang_v1.current_loyalty_tier'):</strong>
+                                                        <br />
+                                                        <span class="lead text-bold" id="display_loyalty_tier">--</span>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <!-- /.box-body -->
                                         </div>
@@ -345,6 +367,27 @@
                 const in_balance_due_item = storedArrayData.find((item) => item.name === "in_balance_due");
                 const in_balance_due = in_balance_due_item ? in_balance_due_item.value : null;
                 $(".balance_due").text(__num_uf(in_balance_due));
+
+                const promotion_code_item = storedArrayData.find((item) => item.name === "ui_promotion_code");
+                const promotion_discount_item = storedArrayData.find((item) => item.name === "ui_promotion_discount");
+                const loyalty_redeemed_item = storedArrayData.find((item) => item.name === "ui_rp_redeemed_amount");
+                const loyalty_tier_item = storedArrayData.find((item) => item.name === "customer_loyalty_tier");
+                const promotion_code = promotion_code_item ? promotion_code_item.value : '';
+                const promotion_discount = promotion_discount_item ? promotion_discount_item.value : 0;
+                const loyalty_redeemed = loyalty_redeemed_item ? loyalty_redeemed_item.value : 0;
+                const loyalty_tier = loyalty_tier_item ? loyalty_tier_item.value : '';
+                if ($("#display_promotion_code").length) {
+                    $("#display_promotion_code").text(promotion_code ? promotion_code : "--");
+                }
+                if ($("#display_promotion_discount").length) {
+                    $("#display_promotion_discount").text(__num_uf(promotion_discount));
+                }
+                if ($("#display_loyalty_redeemed").length) {
+                    $("#display_loyalty_redeemed").text(__num_uf(loyalty_redeemed));
+                }
+                if ($("#display_loyalty_tier").length) {
+                    $("#display_loyalty_tier").text(loyalty_tier ? loyalty_tier : "--");
+                }
 
 
 

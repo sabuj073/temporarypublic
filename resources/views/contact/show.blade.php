@@ -257,6 +257,15 @@
                                         <!-- /.info-box-content -->
                                     </div>
                                 </div>
+                                <div class="col-md-3">
+                                    <div class="info-box bg-blue">
+                                        <span class="info-box-icon"><i class="fa fa-layer-group"></i></span>
+                                        <div class="info-box-content">
+                                          <span class="info-box-text">@lang('lang_v1.current_loyalty_tier')</span>
+                                          <span class="info-box-number">{{ optional($contact->loyalty_tier)->name ?? __('lang_v1.tier_not_assigned') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             @endif
                             <div class="col-md-12">
                                 <div class="table-responsive">

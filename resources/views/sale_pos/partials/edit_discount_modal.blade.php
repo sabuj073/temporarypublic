@@ -71,6 +71,34 @@
 				    </div>
 				    </div>
 				</div>
+				<br>
+				<div class="row">
+					<div class="col-md-12">
+						<h4 class="modal-title">@lang('lang_v1.promotions_engine'):</h4>
+					</div>
+					<div class="col-md-8">
+						<div class="form-group">
+							{!! Form::label('promotion_code_modal', __('lang_v1.promotion_code') . ':' ) !!}
+							<div class="input-group">
+								<span class="input-group-addon">
+									<i class="fa fa-ticket"></i>
+								</span>
+								{!! Form::text('promotion_code_modal', !empty($transaction) ? $transaction->promotion_code : null, ['class' => 'form-control', 'placeholder' => __('lang_v1.promotion_code')]); !!}
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<label>&nbsp;</label>
+						<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-w-full" id="apply_promotion_code">@lang('lang_v1.apply_promotion')</button>
+					</div>
+					<div class="col-md-12">
+						<p>
+							<strong>@lang('lang_v1.promotion_discount'):</strong>
+							<span id="promotion_discount_amount_text">{{ !empty($transaction) ? @num_format($transaction->promotion_discount_amount) : @num_format(0) }}</span>
+						</p>
+						<input type="hidden" id="promotion_discount_amount_modal" value="{{ !empty($transaction) ? @num_format($transaction->promotion_discount_amount) : @num_format(0) }}">
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white" id="posEditDiscountModalUpdate">@lang('messages.update')</button>

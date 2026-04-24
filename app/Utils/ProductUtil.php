@@ -638,7 +638,7 @@ class ProductUtil extends Util
      * @param  array  $discount['discount_type', 'discount_amount']
      * @return mixed (false, array)
      */
-    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true)
+    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true, $promotion_discount = 0)
     {
         if (empty($products)) {
             return false;
@@ -673,6 +673,13 @@ class ProductUtil extends Util
             } else {
                 $output['discount'] = ($discount_amount / 100) * $output['total_before_tax'];
             }
+        }
+        $promotion_discount_amount = $uf_number ? $this->num_uf($promotion_discount) : $promotion_discount;
+        if ($promotion_discount_amount > 0) {
+            $output['discount'] += $promotion_discount_amount;
+        }
+        if ($output['discount'] > $output['total_before_tax']) {
+            $output['discount'] = $output['total_before_tax'];
         }
 
         //Tax

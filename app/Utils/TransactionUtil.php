@@ -13,7 +13,11 @@ use App\Events\TransactionPaymentDeleted;
 use App\Events\TransactionPaymentUpdated;
 use App\Exceptions\AdvanceBalanceNotAvailable;
 use App\Exceptions\PurchaseSellMismatch;
+use App\GiftCard;
+use App\GiftCardTransaction;
 use App\InvoiceScheme;
+use App\LoyaltyPointLedger;
+use App\LoyaltyTier;
 use App\Product;
 use App\PurchaseLine;
 use App\Restaurant\ResTable;
@@ -111,9 +115,12 @@ class TransactionUtil extends Util
             'recur_repetitions' => ! empty($input['recur_repetitions']) ? $input['recur_repetitions'] : 0,
             'order_addresses' => ! empty($input['order_addresses']) ? $input['order_addresses'] : null,
             'sub_type' => ! empty($input['sub_type']) ? $input['sub_type'] : null,
-            'rp_earned' => $input['status'] == 'final' ? $this->calculateRewardPoints($business_id, $final_total) : 0,
+            'rp_earned' => $input['status'] == 'final' ? $this->calculateRewardPoints($business_id, $final_total, $input['contact_id']) : 0,
             'rp_redeemed' => ! empty($input['rp_redeemed']) ? $input['rp_redeemed'] : 0,
             'rp_redeemed_amount' => ! empty($input['rp_redeemed_amount']) ? $input['rp_redeemed_amount'] : 0,
+            'promotion_code' => ! empty($input['promotion_code']) ? $input['promotion_code'] : null,
+            'promotion_discount_amount' => ! empty($input['promotion_discount_amount']) ? $input['promotion_discount_amount'] : 0,
+            'promotion_meta' => ! empty($input['promotion_meta']) ? $input['promotion_meta'] : null,
             'is_created_from_api' => ! empty($input['is_created_from_api']) ? 1 : 0,
             'types_of_service_id' => ! empty($input['types_of_service_id']) ? $input['types_of_service_id'] : null,
             'packing_charge' => ! empty($input['packing_charge']) ? $input['packing_charge'] : 0,
@@ -232,9 +239,12 @@ class TransactionUtil extends Util
             'subscription_repeat_on' => ! empty($input['subscription_repeat_on']) ? $input['subscription_repeat_on'] : null,
             'recur_repetitions' => ! empty($input['recur_repetitions']) ? $input['recur_repetitions'] : 0,
             'order_addresses' => ! empty($input['order_addresses']) ? $input['order_addresses'] : null,
-            'rp_earned' => $input['status'] == 'final' ? $this->calculateRewardPoints($business_id, $final_total) : 0,
+            'rp_earned' => $input['status'] == 'final' ? $this->calculateRewardPoints($business_id, $final_total, $input['contact_id']) : 0,
             'rp_redeemed' => ! empty($input['rp_redeemed']) ? $input['rp_redeemed'] : 0,
             'rp_redeemed_amount' => ! empty($input['rp_redeemed_amount']) ? $input['rp_redeemed_amount'] : 0,
+            'promotion_code' => ! empty($input['promotion_code']) ? $input['promotion_code'] : null,
+            'promotion_discount_amount' => ! empty($input['promotion_discount_amount']) ? $input['promotion_discount_amount'] : 0,
+            'promotion_meta' => ! empty($input['promotion_meta']) ? $input['promotion_meta'] : null,
             'types_of_service_id' => ! empty($input['types_of_service_id']) ? $input['types_of_service_id'] : null,
             'packing_charge' => ! empty($input['packing_charge']) ? $input['packing_charge'] : 0,
             'packing_charge_type' => ! empty($input['packing_charge_type']) ? $input['packing_charge_type'] : null,
@@ -709,6 +719,8 @@ class TransactionUtil extends Util
             $transaction = Transaction::findOrFail($transaction);
         }
 
+        $old_gift_card_usage = $this->getGiftCardUsageMapForTransaction($transaction->id);
+
         //If status is draft don't add payment
         if ($transaction->status == 'draft') {
             return true;
@@ -750,6 +762,7 @@ class TransactionUtil extends Util
                         'amount' => $payment_amount,
                         'method' => $payment['method'],
                         'business_id' => $transaction->business_id,
+                        'gift_card_id' => null,
                         'is_return' => isset($payment['is_return']) ? $payment['is_return'] : 0,
                         'card_transaction_number' => isset($payment['card_transaction_number']) ? $payment['card_transaction_number'] : null,
                         'card_number' => isset($payment['card_number']) ? $payment['card_number'] : null,
@@ -771,6 +784,16 @@ class TransactionUtil extends Util
                         if ($payment['method'] == 'custom_pay_'.$i) {
                             $payment_data['transaction_no'] = $payment["transaction_no_{$i}"];
                         }
+                    }
+
+                    if ($payment['method'] == 'gift_card') {
+                        if (! in_array($transaction->type, ['sell', 'sell_return'])) {
+                            throw new \Exception(__('messages.something_went_wrong'));
+                        }
+                        $gift_card_number = ! empty($payment['gift_card_number']) ? $payment['gift_card_number'] : null;
+                        $gift_card = $this->getValidGiftCardForPayment($transaction->business_id, $gift_card_number);
+                        $payment_data['gift_card_id'] = $gift_card->id;
+                        $payment_data['transaction_no'] = $gift_card->card_number;
                     }
 
                     $payments_formatted[] = new TransactionPayment($payment_data);
@@ -823,6 +846,8 @@ class TransactionUtil extends Util
             }
         }
 
+        $this->syncGiftCardUsageForTransaction($transaction, $old_gift_card_usage, empty($user_id) ? auth()->user()->id : $user_id);
+
         return true;
     }
 
@@ -843,6 +868,19 @@ class TransactionUtil extends Util
             }
             unset($payment["transaction_no_{$i}"]);
         }
+
+        if ($payment['method'] == 'gift_card') {
+            if (! in_array($transaction->type, ['sell', 'sell_return'])) {
+                throw new \Exception(__('messages.something_went_wrong'));
+            }
+            $gift_card_number = ! empty($payment['gift_card_number']) ? $payment['gift_card_number'] : null;
+            $gift_card = $this->getValidGiftCardForPayment($transaction->business_id, $gift_card_number);
+            $payment['gift_card_id'] = $gift_card->id;
+            $payment['transaction_no'] = $gift_card->card_number;
+        } else {
+            $payment['gift_card_id'] = null;
+        }
+        unset($payment['gift_card_number']);
 
         if (! empty($payment['paid_on'])) {
             $payment['paid_on'] = $uf_data ? $this->uf_date($payment['paid_on'], true) : $payment['paid_on'];
@@ -934,6 +972,118 @@ class TransactionUtil extends Util
                         ->where('model_id', $payment->id)
                         ->whereNotIn('amount', $denominations)
                         ->delete();
+    }
+
+    /**
+     * Return gift card usage map for a transaction.
+     */
+    public function getGiftCardUsageMapForTransaction($transaction_id)
+    {
+        return TransactionPayment::where('transaction_id', $transaction_id)
+            ->where('method', 'gift_card')
+            ->whereNotNull('gift_card_id')
+            ->select('gift_card_id', DB::raw('SUM(amount) as total_amount'))
+            ->groupBy('gift_card_id')
+            ->pluck('total_amount', 'gift_card_id')
+            ->toArray();
+    }
+
+    /**
+     * Validate and get gift card for payment.
+     *
+     * @throws \Exception
+     */
+    public function getValidGiftCardForPayment($business_id, $gift_card_number)
+    {
+        $gift_card_number = strtoupper(trim((string) $gift_card_number));
+        if (empty($gift_card_number)) {
+            throw new \Exception(__('lang_v1.gift_card_not_found'));
+        }
+
+        $gift_card = GiftCard::where('business_id', $business_id)
+            ->where('card_number', $gift_card_number)
+            ->first();
+
+        if (empty($gift_card)) {
+            throw new \Exception(__('lang_v1.gift_card_not_found'));
+        }
+
+        if ($gift_card->status !== 'active') {
+            throw new \Exception(__('lang_v1.gift_card_not_usable'));
+        }
+
+        if (! empty($gift_card->expires_at) && now()->gt($gift_card->expires_at)) {
+            $gift_card->status = 'expired';
+            $gift_card->save();
+            throw new \Exception(__('lang_v1.gift_card_expired'));
+        }
+
+        return $gift_card;
+    }
+
+    /**
+     * Sync gift card usage based on payment lines.
+     *
+     * @throws \Exception
+     */
+    public function syncGiftCardUsageForTransaction($transaction, $old_usage = [], $created_by = null)
+    {
+        if (! is_object($transaction)) {
+            $transaction = Transaction::findOrFail($transaction);
+        }
+
+        $new_usage = $this->getGiftCardUsageMapForTransaction($transaction->id);
+        $card_ids = array_unique(array_merge(array_keys($old_usage), array_keys($new_usage)));
+        $created_by = $created_by ?: auth()->user()->id;
+
+        foreach ($card_ids as $gift_card_id) {
+            $old_amount = isset($old_usage[$gift_card_id]) ? (float) $old_usage[$gift_card_id] : 0;
+            $new_amount = isset($new_usage[$gift_card_id]) ? (float) $new_usage[$gift_card_id] : 0;
+            $delta = round($new_amount - $old_amount, 4);
+
+            if ($delta == 0.0) {
+                continue;
+            }
+
+            $gift_card = GiftCard::where('business_id', $transaction->business_id)
+                ->where('id', $gift_card_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (empty($gift_card)) {
+                throw new \Exception(__('lang_v1.gift_card_not_found'));
+            }
+
+            if ($delta > 0) {
+                if ($gift_card->status !== 'active') {
+                    throw new \Exception(__('lang_v1.gift_card_not_usable'));
+                }
+                if (! empty($gift_card->expires_at) && now()->gt($gift_card->expires_at)) {
+                    $gift_card->status = 'expired';
+                    $gift_card->save();
+                    throw new \Exception(__('lang_v1.gift_card_expired'));
+                }
+                if ($gift_card->current_balance < $delta) {
+                    throw new \Exception(__('lang_v1.gift_card_insufficient_balance'));
+                }
+            }
+
+            $balance_before = $gift_card->current_balance;
+            $gift_card->current_balance = $gift_card->current_balance - $delta;
+            $gift_card->save();
+
+            GiftCardTransaction::create([
+                'business_id' => $transaction->business_id,
+                'gift_card_id' => $gift_card->id,
+                'transaction_id' => $transaction->id,
+                'type' => $delta > 0 ? 'redeem' : 'reversal',
+                'amount' => abs($delta),
+                'balance_before' => $balance_before,
+                'balance_after' => $gift_card->current_balance,
+                'note' => $delta > 0 ? __('lang_v1.gift_card_redeem_entry') : __('lang_v1.gift_card_reversal_entry'),
+                'created_by' => $created_by,
+            ]);
+        }
     }
 
     /**
@@ -1390,6 +1540,12 @@ class TransactionUtil extends Util
 
                 $total_line_taxes += ($line['tax_unformatted'] * $line['quantity']);
             }
+        }
+
+        // Receipts like "elegant" read subtotal_exc_tax; ensure it exists for all sell types.
+        if (! isset($output['subtotal_exc_tax'])) {
+            $tb_exc = $transaction->total_before_tax ?? 0;
+            $output['subtotal_exc_tax'] = $this->num_f($tb_exc, true, $business_details);
         }
 
         //show cat code
@@ -3340,19 +3496,41 @@ class TransactionUtil extends Util
                     )->get();
 
             $purchase_sell_map = [];
+            $apply_average_costing = $business['accounting_method'] == 'avco' &&
+                empty($line->lot_no_line_id) && empty($purchase_line_id);
+            $remaining_available_qty = $apply_average_costing ? $rows->sum('quantity_available') : 0;
 
             //Iterate over the rows, assign the purchase line to sell lines.
             $qty_selling = $line->quantity;
             foreach ($rows as $k => $row) {
                 $qty_allocated = 0;
 
-                //Check if qty_available is more or equal
-                if ($qty_selling <= $row->quantity_available) {
-                    $qty_allocated = $qty_selling;
-                    $qty_selling = 0;
+                if ($apply_average_costing && $remaining_available_qty > 0) {
+                    //Distribute quantity proportionally to apply weighted average costing.
+                    $is_last_row = $k == ($rows->count() - 1);
+                    if ($is_last_row) {
+                        $qty_allocated = min($qty_selling, $row->quantity_available);
+                    } else {
+                        $proportional_qty = ($qty_selling * $row->quantity_available) / $remaining_available_qty;
+                        $qty_allocated = min($proportional_qty, $row->quantity_available);
+                    }
+
+                    $qty_selling = $qty_selling - $qty_allocated;
+                    $remaining_available_qty = $remaining_available_qty - $row->quantity_available;
                 } else {
-                    $qty_selling = $qty_selling - $row->quantity_available;
-                    $qty_allocated = $row->quantity_available;
+                    //Check if qty_available is more or equal
+                    if ($qty_selling <= $row->quantity_available) {
+                        $qty_allocated = $qty_selling;
+                        $qty_selling = 0;
+                    } else {
+                        $qty_selling = $qty_selling - $row->quantity_available;
+                        $qty_allocated = $row->quantity_available;
+                    }
+                }
+
+                //Normalize floating point edge case from proportional split.
+                if (abs((float) $qty_selling) < 0.0001) {
+                    $qty_selling = 0;
                 }
 
                 //Check for sell mapping or stock adjsutment mapping
@@ -4726,7 +4904,7 @@ class TransactionUtil extends Util
      *
      * @return int
      */
-    public function calculateRewardPoints($business_id, $total)
+    public function calculateRewardPoints($business_id, $total, $contact_id = null)
     {
         if (session()->has('business')) {
             $business = session()->get('business');
@@ -4747,6 +4925,16 @@ class TransactionUtil extends Util
             if (! empty($business->max_rp_per_order) && $business->max_rp_per_order < $total_points) {
                 $total_points = $business->max_rp_per_order;
             }
+
+            if (! empty($contact_id)) {
+                $contact = Contact::find($contact_id);
+                if (! empty($contact->loyalty_tier_id)) {
+                    $tier = LoyaltyTier::find($contact->loyalty_tier_id);
+                    if (! empty($tier) && ! empty($tier->bonus_multiplier) && (float) $tier->bonus_multiplier > 1) {
+                        $total_points = floor($total_points * (float) $tier->bonus_multiplier);
+                    }
+                }
+            }
         }
 
         return $total_points;
@@ -4757,13 +4945,8 @@ class TransactionUtil extends Util
      *
      * @return void
      */
-    public function updateCustomerRewardPoints(
-        $customer_id,
-        $earned,
-        $earned_before = 0,
-        $redeemed = 0,
-        $redeemed_before = 0
-    ) {
+    public function updateCustomerRewardPoints($customer_id, $earned, $earned_before = 0, $redeemed = 0, $redeemed_before = 0, $lifetime_sale_delta = 0, $transaction_id = null, $created_by = null)
+    {
         $customer = Contact::find($customer_id);
 
         //Return if walk in customer
@@ -4781,7 +4964,62 @@ class TransactionUtil extends Util
 
         $customer->total_rp = $total_points;
         $customer->total_rp_used += $total_redeemed;
+        if (! empty($lifetime_sale_delta)) {
+            $customer->lifetime_sale_total = (float) $customer->lifetime_sale_total + (float) $lifetime_sale_delta;
+        }
+        $this->assignCustomerLoyaltyTier($customer);
         $customer->save();
+
+        $created_by = $created_by ?: auth()->id();
+        if ($total_earned > 0) {
+            LoyaltyPointLedger::create([
+                'business_id' => $customer->business_id,
+                'contact_id' => $customer->id,
+                'transaction_id' => $transaction_id,
+                'entry_type' => 'earned',
+                'points' => $total_earned,
+                'balance_after' => $customer->total_rp,
+                'note' => 'Reward points earned from sale',
+                'created_by' => $created_by,
+            ]);
+        }
+        if ($total_redeemed > 0) {
+            LoyaltyPointLedger::create([
+                'business_id' => $customer->business_id,
+                'contact_id' => $customer->id,
+                'transaction_id' => $transaction_id,
+                'entry_type' => 'redeemed',
+                'points' => $total_redeemed,
+                'balance_after' => $customer->total_rp,
+                'note' => 'Reward points redeemed in sale',
+                'created_by' => $created_by,
+            ]);
+        }
+    }
+
+    public function assignCustomerLoyaltyTier($contact)
+    {
+        if (! is_object($contact)) {
+            $contact = Contact::find($contact);
+        }
+        if (empty($contact)) {
+            return;
+        }
+        $business = Business::find($contact->business_id);
+        $common_settings = ! empty($business->common_settings) ? $business->common_settings : [];
+        if (array_key_exists('enable_loyalty_tiers', $common_settings) && empty($common_settings['enable_loyalty_tiers'])) {
+            $contact->loyalty_tier_id = null;
+            return;
+        }
+
+        $tier = LoyaltyTier::where('business_id', $contact->business_id)
+            ->where('is_active', 1)
+            ->where('min_total_points', '<=', (float) $contact->total_rp)
+            ->where('min_lifetime_sales', '<=', (float) $contact->lifetime_sale_total)
+            ->orderBy('level', 'desc')
+            ->first();
+
+        $contact->loyalty_tier_id = ! empty($tier) ? $tier->id : null;
     }
 
     /**
@@ -4851,7 +5089,7 @@ class TransactionUtil extends Util
                 $expiry_date = $expiry_date->addYears($business->rp_expiry_period);
             }
 
-            if ($expiry_date->format('Y-m-d') >= \Carbon::now()->format('Y-m-d')) {
+            if ($expiry_date->format('Y-m-d') < \Carbon::now()->format('Y-m-d')) {
                 $is_expired = true;
             }
         }
@@ -6069,6 +6307,9 @@ class TransactionUtil extends Util
 
         if (! array_key_exists($inputs['method'], $payment_types)) {
             throw new \Exception('Payment method not found');
+        }
+        if ($inputs['method'] == 'gift_card') {
+            throw new \Exception(__('messages.something_went_wrong'));
         }
         $inputs['paid_on'] = $request->input('paid_on', \Carbon::now()->toDateTimeString());
         if ($format_data) {

@@ -131,6 +131,11 @@ class Transaction extends Model
         return $this->belongsTo(\App\TypesOfService::class, 'types_of_service_id');
     }
 
+    public function promotion_usages()
+    {
+        return $this->hasMany(\App\PromotionUsage::class, 'transaction_id');
+    }
+
     /**
      * Retrieves documents path if exists
      */

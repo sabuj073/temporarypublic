@@ -1,12 +1,4 @@
 <style id="vp-stock-adjustment-vendo-styles">
-    body.vp-stock-adjustment-vendo-page aside.side-bar.vp-custom-sidebar {
-        display: none !important;
-    }
-
-    body.vp-stock-adjustment-vendo-page .vp-side-btn {
-        display: none !important;
-    }
-
     body.vp-stock-adjustment-vendo-page #scrollable-container {
         overflow-x: hidden;
         padding-bottom: 0;
@@ -20,9 +12,15 @@
         border: 1px solid rgba(255, 255, 255, 0.35);
         background: linear-gradient(140deg, rgba(51, 80, 142, 0.45) 0%, rgba(35, 57, 118, 0.5) 100%);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        /*
+         * Match .vp-global-header: same horizontal margins (26+26). Do not use width:100% here —
+         * it adds to margins and overflows the main column / causes body horizontal scroll on desktop.
+         * min(100%, …) keeps the shell inside #scrollable-container width as well as the viewport.
+         */
         width: auto;
-        max-width: none;
+        max-width: min(100%, calc(100vw - 52px));
         min-width: 0;
+        overflow-x: hidden;
     }
 
     body.vp-stock-adjustment-vendo-page .vp-stock-adjustment-shell {
@@ -168,18 +166,38 @@
 
     body.vp-stock-adjustment-vendo-page .vp-stock-adjustment-table-wrap {
         padding: 0 8px 8px;
+        width: 100%;
         max-width: 100%;
         min-width: 0;
         overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.vp-stock-adjustment-vendo-page .vp-stock-adjustment-table-wrap .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+        margin: 0;
     }
 
     body.vp-stock-adjustment-vendo-page #stock_adjustment_table_wrapper {
         width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.vp-stock-adjustment-vendo-page #stock_adjustment_table_wrapper .dataTables_scroll,
+    body.vp-stock-adjustment-vendo-page #stock_adjustment_table_wrapper .dataTables_scrollHead,
+    body.vp-stock-adjustment-vendo-page #stock_adjustment_table_wrapper .dataTables_scrollBody {
+        max-width: 100%;
     }
 
     body.vp-stock-adjustment-vendo-page #stock_adjustment_table {
         margin: 0 !important;
-        table-layout: fixed;
+        table-layout: auto;
         width: 100% !important;
     }
 
@@ -320,9 +338,42 @@
     }
 
     @media (max-width: 991px) {
+        /*
+         * layouts/app.blade.php (≤991px) sets overflow:visible !important on .vp-*-card / -table-wrap /
+         * .table-responsive / .dataTables_wrapper and min-width:860px on tables — that breaks this page
+         * on mobile. Re-clamp scrolling to the white card.
+         */
+        body.vp-stock-adjustment-vendo-page #scrollable-container .vp-stock-adjustment-card {
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+        }
+
+        body.vp-stock-adjustment-vendo-page #scrollable-container .vp-stock-adjustment-table-wrap,
+        body.vp-stock-adjustment-vendo-page #scrollable-container .vp-stock-adjustment-table-wrap .table-responsive,
+        body.vp-stock-adjustment-vendo-page #scrollable-container #stock_adjustment_table_wrapper {
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+
         body.vp-stock-adjustment-vendo-page .vp-stock-adjustment-page-wrap {
-            margin: 14px 12px 16px;
-            padding: 10px 12px;
+            margin: 14px 10px 16px;
+            padding: 10px 10px;
+            width: auto;
+            max-width: calc(100vw - 20px);
+        }
+
+        body.vp-stock-adjustment-vendo-page #stock_adjustment_table thead th,
+        body.vp-stock-adjustment-vendo-page #stock_adjustment_table tbody td {
+            width: auto !important;
+            min-width: 120px;
+            white-space: nowrap;
+        }
+
+        body.vp-stock-adjustment-vendo-page #stock_adjustment_table thead th:last-child,
+        body.vp-stock-adjustment-vendo-page #stock_adjustment_table tbody td:last-child {
+            min-width: 140px;
         }
     }
 

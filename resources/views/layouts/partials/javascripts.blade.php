@@ -210,6 +210,193 @@
 
         $('.dt-buttons.btn-group').find('a.btn').removeClass('btn-default');
         $('.dt-buttons.btn-group').find('a.btn').removeClass('btn');
+
+        (function () {
+            var $fab = $('#vp-app-fullscreen-fab');
+            if (!$fab.length) {
+                return;
+            }
+            var $icon = $fab.find('i').first();
+            var FS_PREF_KEY = 'vp_prefer_fullscreen';
+            var restoreListenersAttached = false;
+
+            function fullscreenActive() {
+                return !!(
+                    document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement
+                );
+            }
+
+            function setFullscreenPreference(on) {
+                try {
+                    if (on) {
+                        sessionStorage.setItem(FS_PREF_KEY, '1');
+                    } else {
+                        sessionStorage.removeItem(FS_PREF_KEY);
+                    }
+                } catch (e) {}
+            }
+
+            function wantsFullscreenPreference() {
+                try {
+                    return sessionStorage.getItem(FS_PREF_KEY) === '1';
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function requestFsOnRoot() {
+                var docEl = document.documentElement;
+                var req =
+                    docEl.requestFullscreen ||
+                    docEl.webkitRequestFullscreen ||
+                    docEl.mozRequestFullScreen ||
+                    docEl.msRequestFullscreen;
+                if (!req) {
+                    return null;
+                }
+                return req.call(docEl);
+            }
+
+            function detachRestoreListeners() {
+                if (!restoreListenersAttached) {
+                    return;
+                }
+                document.removeEventListener('click', onUserGestureRestore, true);
+                document.removeEventListener('touchstart', onUserGestureRestore, true);
+                restoreListenersAttached = false;
+            }
+
+            function onUserGestureRestore(ev) {
+                if ($fab[0] && ev && ev.target && ($fab[0] === ev.target || $fab[0].contains(ev.target))) {
+                    return;
+                }
+                if (!wantsFullscreenPreference() || fullscreenActive()) {
+                    detachRestoreListeners();
+                    return;
+                }
+                try {
+                    var p = requestFsOnRoot();
+                    if (p && typeof p.then === 'function') {
+                        p.then(function () {
+                            detachRestoreListeners();
+                            syncFullscreenFab();
+                        }).catch(function () {});
+                    } else {
+                        window.setTimeout(function () {
+                            if (fullscreenActive()) {
+                                detachRestoreListeners();
+                            }
+                            syncFullscreenFab();
+                        }, 50);
+                    }
+                } catch (e) {}
+            }
+
+            function scheduleFullscreenRestoreAfterLoad() {
+                if (!wantsFullscreenPreference()) {
+                    return;
+                }
+                if (fullscreenActive()) {
+                    return;
+                }
+                try {
+                    var p = requestFsOnRoot();
+                    if (p && typeof p.then === 'function') {
+                        p.then(function () {
+                            syncFullscreenFab();
+                        }).catch(function () {});
+                    }
+                } catch (e1) {}
+
+                if (fullscreenActive()) {
+                    return;
+                }
+                if (!restoreListenersAttached) {
+                    document.addEventListener('click', onUserGestureRestore, true);
+                    document.addEventListener('touchstart', onUserGestureRestore, true);
+                    restoreListenersAttached = true;
+                }
+            }
+
+            function syncFullscreenFab() {
+                var on = fullscreenActive();
+                $fab.attr('aria-pressed', on ? 'true' : 'false');
+                if (on) {
+                    $icon.removeClass('fa-expand').addClass('fa-compress');
+                    $fab.attr('title', $fab.data('title-exit')).attr('aria-label', $fab.data('title-exit'));
+                } else {
+                    $icon.removeClass('fa-compress').addClass('fa-expand');
+                    $fab.attr('title', $fab.data('title-enter')).attr('aria-label', $fab.data('title-enter'));
+                }
+            }
+
+            $fab.on('click', function () {
+                var docEl = document.documentElement;
+                var active = fullscreenActive();
+                try {
+                    if (!active) {
+                        var req =
+                            docEl.requestFullscreen ||
+                            docEl.webkitRequestFullscreen ||
+                            docEl.mozRequestFullScreen ||
+                            docEl.msRequestFullscreen;
+                        if (req) {
+                            var p = req.call(docEl);
+                            if (p && typeof p.then === 'function') {
+                                p.then(function () {
+                                    setFullscreenPreference(true);
+                                    syncFullscreenFab();
+                                }).catch(function () {
+                                    if (typeof toastr !== 'undefined') {
+                                        toastr.warning($fab.data('msg-unsupported'));
+                                    }
+                                });
+                            } else {
+                                window.setTimeout(function () {
+                                    if (fullscreenActive()) {
+                                        setFullscreenPreference(true);
+                                    }
+                                    syncFullscreenFab();
+                                }, 50);
+                            }
+                        } else if (typeof toastr !== 'undefined') {
+                            toastr.warning($fab.data('msg-unsupported'));
+                        }
+                    } else {
+                        setFullscreenPreference(false);
+                        detachRestoreListeners();
+                        var exit =
+                            document.exitFullscreen ||
+                            document.webkitExitFullscreen ||
+                            document.mozCancelFullScreen ||
+                            document.msExitFullscreen;
+                        if (exit) {
+                            var pExit = exit.call(document);
+                            if (pExit && typeof pExit.catch === 'function') {
+                                pExit.catch(function () {});
+                            }
+                        }
+                    }
+                } catch (e) {
+                    if (typeof toastr !== 'undefined') {
+                        toastr.warning($fab.data('msg-unsupported'));
+                    }
+                }
+            });
+
+            $(document).on(
+                'fullscreenchange webkitfullscreenchange mozfullscreenchange MSFullscreenChange',
+                syncFullscreenFab
+            );
+            syncFullscreenFab();
+            scheduleFullscreenRestoreAfterLoad();
+            window.addEventListener('pageshow', function () {
+                scheduleFullscreenRestoreAfterLoad();
+            });
+        })();
         
         // $('.date_range').on('show.daterangepicker', function (ev, picker) {
         //     $(picker.container).insertAfter($(this));

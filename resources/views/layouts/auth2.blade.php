@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}"
-    class="{{ request()->routeIs('login') ? 'vp-login-dashboard-page' : '' }}">
+    class="{{ request()->routeIs('login') || request()->routeIs('business.getRegister') || request()->routeIs('password.request') || request()->routeIs('password.reset') ? 'vp-login-dashboard-page' : '' }}">
 
 <head>
     <meta charset="utf-8">
@@ -17,7 +17,7 @@
 
     @include('layouts.partials.extracss_auth')
 
-    @if (request()->routeIs('login'))
+    @if (request()->routeIs('login') || request()->routeIs('business.getRegister') || request()->routeIs('password.request') || request()->routeIs('password.reset'))
         @include('layouts.partials.auth-login-dashboard-styles')
     @endif
 
@@ -48,15 +48,15 @@
     @endif
     <div class="container-fluid">
         <div class="row eq-height-row">
-            <div class="col-md-12 col-sm-12 col-xs-12 right-col tw-pt-20 tw-pb-10 tw-px-5">
+            <div class="col-md-12 col-sm-12 col-xs-12 right-col vp-auth-page-wrap">
                 <div class="row">
                     {{-- <div
                         class="lg:tw-w-16 md:tw-h-16 tw-w-12 tw-h-12 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-overflow-hidden tw-bg-white tw-rounded-full tw-p-0.5 tw-mb-4">
                         <img src="{{ asset('img/logo-small.png')}}" alt="lock" class="tw-rounded-full tw-object-fill" />
                     </div> --}}
 
-                    <div class="tw-absolute tw-top-2 md:tw-top-5 tw-left-4 md:tw-left-8 tw-flex tw-items-center tw-gap-4"
-                        style="text-align: left">
+                    <div class="vp-auth-topbar">
+                        <div class="vp-auth-topbar-left">
                         <a href="{{ url('/') }}" class="vp-auth-logo-link" style="max-width: 250px; display: inline-block;">
                             <div
                                 class="vp-auth-logo-wrap tw-flex tw-items-center tw-justify-start tw-mx-auto tw-mb-2 tw-overflow-visible"
@@ -81,10 +81,9 @@
                                 @lang('gym::lang.gym_member_profile')
                             </a>
                         @endif
-                    </div>
+                        </div>
 
-                    <div class="tw-absolute tw-top-5 md:tw-top-8 tw-right-5 md:tw-right-10 tw-flex tw-items-center tw-gap-4"
-                        style="text-align: left">
+                        <div class="vp-auth-topbar-right">
                         @if (!($request->segment(1) == 'business' && $request->segment(2) == 'register'))
                             <!-- Register Url -->
                             @if (config('constants.allow_registration'))
@@ -110,9 +109,7 @@
                                 href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'login'])}}@if(!empty(request()->lang)){{'?lang='.request()->lang}}@endif">{{ __('business.sign_in') }}</a>
                         @endif
                         @include('layouts.partials.language_btn')
-                    </div>
-                    <div class="col-md-10 col-xs-8" style="text-align: right;">
-
+                        </div>
                     </div>
                 </div>
                 @yield('content')
@@ -144,6 +141,44 @@
             background-color: white !important;
         }
 
+        .vp-auth-page-wrap {
+            padding: 1.25rem clamp(1rem, 4vw, 2.5rem) 1.5rem !important;
+            box-sizing: border-box;
+        }
+
+        /* Bootstrap .row uses negative side margins; without columns they cancel parent padding */
+        .vp-auth-page-wrap > .row:first-of-type {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        .vp-auth-topbar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding-top: 0.25rem;
+        }
+
+        .vp-auth-topbar-left,
+        .vp-auth-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .vp-auth-topbar-right {
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .vp-auth-topbar-right .tw-dw-dropdown {
+            margin: 0 !important;
+        }
+
         /* Logo cap (Tailwind arbitrary classes may be missing from built CSS) */
         .tw-absolute.tw-flex > a.vp-auth-logo-link {
             flex-shrink: 1;
@@ -162,6 +197,39 @@
             height: auto !important;
             display: block !important;
             object-fit: contain;
+        }
+
+        @media (max-width: 767px) {
+            .vp-auth-page-wrap {
+                padding: 1rem clamp(0.85rem, 4vw, 1.25rem) 1.2rem !important;
+            }
+
+            .vp-auth-topbar {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.4rem;
+                text-align: center;
+                margin-bottom: 0.35rem;
+            }
+
+            .vp-auth-topbar-left,
+            .vp-auth-topbar-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.6rem;
+            }
+
+            .vp-auth-logo-wrap {
+                margin-bottom: 0 !important;
+            }
+
+            .vp-auth-topbar-right .tw-border-2 {
+                height: 2.2rem;
+                width: auto;
+                padding-left: 0.9rem;
+                padding-right: 0.9rem;
+            }
         }
     </style>
 </body>

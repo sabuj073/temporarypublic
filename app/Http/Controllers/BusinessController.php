@@ -308,10 +308,10 @@ class BusinessController extends Controller
             $months[$i] = __('business.months.'.$i);
         }
 
-        $accounting_methods = [
-            'fifo' => __('business.fifo'),
-            'lifo' => __('business.lifo'),
-        ];
+        $accounting_methods = $this->businessUtil->allAccountingMethods(
+            ! empty($business->common_settings) ? $business->common_settings : [],
+            $business->accounting_method
+        );
         $commission_agent_dropdown = [
             '' => __('lang_v1.disable'),
             'logged_in_user' => __('lang_v1.logged_in_user'),
@@ -475,7 +475,13 @@ class BusinessController extends Controller
 
             $business_details['custom_labels'] = json_encode($business_details['custom_labels']);
 
-            $business_details['common_settings'] = ! empty($request->input('common_settings')) ? $request->input('common_settings') : [];
+            $common_settings = ! empty($request->input('common_settings')) ? $request->input('common_settings') : [];
+            $business_details['common_settings'] = $common_settings;
+
+            //Fallback to FIFO if average costing is disabled from settings.
+            if (empty($common_settings['enable_average_costing']) && $business_details['accounting_method'] == 'avco') {
+                $business_details['accounting_method'] = 'fifo';
+            }
 
             //Enabled modules
             $enabled_modules = $request->input('enabled_modules');

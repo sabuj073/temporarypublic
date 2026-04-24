@@ -12,6 +12,32 @@
     </div>
     <div class="col-sm-4">
         <div class="form-group">
+            <div class="checkbox">
+                <label>
+                {!! Form::checkbox('common_settings[enable_promotion_engine]', 1, !isset($common_settings['enable_promotion_engine']) || !empty($common_settings['enable_promotion_engine']), [ 'class' => 'input-icheck']); !!}
+                @lang('lang_v1.promotions_engine')
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <div class="checkbox">
+                <label>
+                {!! Form::checkbox('common_settings[enable_loyalty_tiers]', 1, !isset($common_settings['enable_loyalty_tiers']) || !empty($common_settings['enable_loyalty_tiers']), [ 'class' => 'input-icheck']); !!}
+                @lang('lang_v1.loyalty_tiers')
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <p class="help-block">
+            Configure tier rules at <a href="{{ action([\App\Http\Controllers\LoyaltyTierController::class, 'index']) }}" target="_blank">Loyalty Tier Membership</a>
+            and create campaigns at <a href="{{ action([\App\Http\Controllers\PromotionController::class, 'index']) }}" target="_blank">Promotion Engine</a>.
+        </p>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
             {!! Form::label('rp_name', __('lang_v1.rp_name') . ':') !!}
             {!! Form::text('rp_name', $business->rp_name, ['class' => 'form-control','placeholder' => __('lang_v1.rp_name')]); !!}
         </div>

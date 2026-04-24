@@ -375,7 +375,17 @@
 
         @media (max-width: 640px) {
             .vp-tile-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .vp-tile-card {
+                min-height: 128px;
+                gap: 10px;
+            }
+
+            .vp-tile-card h3 {
+                font-size: 17px;
             }
 
             .vp-logo-wrap {
@@ -390,6 +400,27 @@
                 flex: 1;
                 justify-content: center;
                 min-width: 80px;
+            }
+        }
+
+        @media (max-width: 991px) {
+            body.vp-home-dashboard {
+                background-attachment: scroll !important;
+                background-position: center top !important;
+            }
+
+            body.vp-home-dashboard #scrollable-container {
+                @if (!empty($dashboardBgPath))
+                    background-image:
+                        linear-gradient(0deg, rgba(36, 37, 91, 0.8), rgba(36, 37, 91, 0.8)),
+                        url('{{ $dashboardBgPath }}') !important;
+                    background-size: cover !important;
+                    background-position: center top !important;
+                    background-repeat: no-repeat !important;
+                    background-attachment: scroll !important;
+                @else
+                    background-image: linear-gradient(120deg, #1c2a62 0%, #242f70 55%, #2a377f 100%) !important;
+                @endif
             }
         }
     </style>

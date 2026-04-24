@@ -155,7 +155,7 @@ class Util
             }
         }
 
-        $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'cheque' => __('lang_v1.cheque'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'other' => __('lang_v1.other')];
+        $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'cheque' => __('lang_v1.cheque'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'gift_card' => __('lang_v1.gift_card'), 'other' => __('lang_v1.other')];
 
         $payment_types['custom_pay_1'] = ! empty($custom_labels['payments']['custom_pay_1']) ? $custom_labels['payments']['custom_pay_1'] : __('lang_v1.custom_payment', ['number' => 1]);
         $payment_types['custom_pay_2'] = ! empty($custom_labels['payments']['custom_pay_2']) ? $custom_labels['payments']['custom_pay_2'] : __('lang_v1.custom_payment', ['number' => 2]);
@@ -168,6 +168,16 @@ class Util
         //Unset payment types if not enabled in business location
         if (! empty($location)) {
             $location_account_settings = ! empty($location->default_payment_accounts) ? json_decode($location->default_payment_accounts, true) : [];
+            if (! is_array($location_account_settings)) {
+                $location_account_settings = [];
+            }
+            // Older locations may lack newer payment keys (e.g. gift_card); default missing gift_card to enabled.
+            if (! isset($location_account_settings['gift_card'])) {
+                $location_account_settings['gift_card'] = [
+                    'is_enabled' => 1,
+                    'account' => null,
+                ];
+            }
             $enabled_accounts = [];
             foreach ($location_account_settings as $key => $value) {
                 if (! empty($value['is_enabled'])) {

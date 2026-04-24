@@ -1,12 +1,4 @@
 <style id="vp-business-settings-vendo-styles">
-    body.vp-business-settings-vendo-page aside.side-bar.vp-custom-sidebar {
-        display: none !important;
-    }
-
-    body.vp-business-settings-vendo-page .vp-side-btn {
-        display: none !important;
-    }
-
     body.vp-business-settings-vendo-page #scrollable-container {
         overflow-x: hidden;
         padding-bottom: 0;
@@ -20,9 +12,11 @@
         border: 1px solid rgba(255, 255, 255, 0.35);
         background: linear-gradient(140deg, rgba(51, 80, 142, 0.45) 0%, rgba(35, 57, 118, 0.5) 100%);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        /* Same outer width rules as .vp-global-header — avoid width:100% + lateral margins overflow */
         width: auto;
-        max-width: none;
+        max-width: calc(100vw - 52px);
         min-width: 0;
+        overflow-x: hidden;
     }
 
     body.vp-business-settings-vendo-page .vp-business-settings-shell {
@@ -221,8 +215,11 @@
     body.vp-business-settings-vendo-page .vp-business-settings-main {
         flex: 1 1 auto;
         min-width: 0;
+        max-width: 100%;
         display: flex;
         flex-direction: column;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     body.vp-business-settings-vendo-page .vp-business-settings-section-bar {
@@ -315,8 +312,10 @@
 
     @media (max-width: 991px) {
         body.vp-business-settings-vendo-page .vp-business-settings-page-wrap {
-            margin: 14px 12px 16px;
-            padding: 10px 12px;
+            margin: 14px 10px 16px;
+            padding: 10px 10px;
+            width: auto;
+            max-width: calc(100vw - 20px);
         }
 
         body.vp-business-settings-vendo-page .vp-business-settings-sidebar .list-group-item.active::after {

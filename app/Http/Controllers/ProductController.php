@@ -14,6 +14,7 @@ use App\PurchaseLine;
 use App\SellingPriceGroup;
 use App\TaxRate;
 use App\Unit;
+use App\Utils\EslUtil;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
 use App\Variation;
@@ -38,6 +39,8 @@ class ProductController extends Controller
 
     protected $moduleUtil;
 
+    protected $eslUtil;
+
     private $barcode_types;
 
     /**
@@ -46,10 +49,11 @@ class ProductController extends Controller
      * @param  ProductUtils  $product
      * @return void
      */
-    public function __construct(ProductUtil $productUtil, ModuleUtil $moduleUtil)
+    public function __construct(ProductUtil $productUtil, ModuleUtil $moduleUtil, EslUtil $eslUtil)
     {
         $this->productUtil = $productUtil;
         $this->moduleUtil = $moduleUtil;
+        $this->eslUtil = $eslUtil;
 
         //barcode types
         $this->barcode_types = $this->productUtil->barcode_types();
@@ -553,6 +557,10 @@ class ProductController extends Controller
             Media::uploadMedia($product->business_id, $product, $request, 'product_brochure', true);
 
             DB::commit();
+            if ($this->eslUtil->isEnabled($business_id)) {
+                $product->load(['product_variations.variations']);
+                $this->eslUtil->syncProductPrice($business_id, $product, $request->session()->get('user.id'));
+            }
             $output = ['success' => 1,
                 'msg' => __('product.product_added_success'),
             ];
@@ -874,6 +882,10 @@ class ProductController extends Controller
             Media::uploadMedia($product->business_id, $product, $request, 'product_brochure', true);
 
             DB::commit();
+            if ($this->eslUtil->isEnabled($business_id)) {
+                $product->load(['product_variations.variations']);
+                $this->eslUtil->syncProductPrice($business_id, $product, $request->session()->get('user.id'));
+            }
             $output = ['success' => 1,
                 'msg' => __('product.product_updated_success'),
             ];

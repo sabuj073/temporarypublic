@@ -24,14 +24,14 @@
             <div class="col-md-12 tw-pt-0 tw-mb-2">
                 <div
                     class="row tw-flex lg:tw-flex-row md:tw-flex-col sm:tw-flex-col tw-flex-col tw-items-start md:tw-gap-4 vp-pos-main-row">
-                    @if (empty($pos_settings['hide_product_suggestion']) && !isMobile())
+                    @if (empty($pos_settings['hide_product_suggestion']))
                         <div
                             class="md:tw-no-padding tw-w-full lg:tw-px-0 lg:tw-pr-3 @if (empty($pos_settings['hide_product_suggestion'])) lg:tw-flex-1 lg:tw-max-w-[60%] @else lg:tw-w-[100%] @endif tw-px-0 vp-pos-products-col">
                             @include('sale_pos.partials.pos_sidebar')
                         </div>
                     @endif
                     <div
-                        class="tw-px-0 tw-w-full lg:tw-px-0 @if (empty($pos_settings['hide_product_suggestion']) && !isMobile()) lg:tw-flex-1 lg:tw-min-w-0 @else lg:tw-w-[100%] @endif vp-pos-cart-col">
+                        class="tw-px-0 tw-w-full lg:tw-px-0 @if (empty($pos_settings['hide_product_suggestion'])) lg:tw-flex-1 lg:tw-min-w-0 @else lg:tw-w-[100%] @endif vp-pos-cart-col">
                         <div class="tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-rounded-2xl tw-bg-white tw-mb-2 tw-p-2 vp-pos-cart-shell">
                             <div class="box-body pb-0">
                                 <div class="vp-pos-cart-panel-inner">

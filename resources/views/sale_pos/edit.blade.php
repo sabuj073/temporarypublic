@@ -46,7 +46,7 @@
 							@endif
 						</div>
 					</div>
-				@if(empty($pos_settings['hide_product_suggestion'])  && !isMobile() && empty($only_payment))
+				@if(empty($pos_settings['hide_product_suggestion']) && empty($only_payment))
 					<div class="col-md-8 no-padding vp-pos-products-col">
 						@include('sale_pos.partials.pos_sidebar')
 					</div>

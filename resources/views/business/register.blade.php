@@ -3,9 +3,9 @@
 
 @section('content')
 
-    <div class="col-md-8 col-xs-12 col-md-offset-2 tw-mt-6">
+    <div class="col-md-8 col-xs-12 col-md-offset-2 tw-mt-4 md:tw-mt-6">
         <div
-            class=" tw-p-2 sm:tw-p-3 tw-mb-4 tw-transition-all tw-duration-200  tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 tw-ring-gray-200">
+            class="vp-auth-card tw-mb-4 tw-transition-all tw-duration-200">
             <div class="tw-flex tw-flex-col tw-gap-4 tw-dw-rounded-box tw-dw-p-6 tw-dw-max-w-md">
                 <div class="tw-flex tw-flex-col rounded-2xl tw-dw-p-6 tw-dw-max-w-md text-center">
                     {{-- <svg xmlns="http://www.w3.org/2000/svg" class="tw-ml-4 tw-mt-4 icon icon-tabler icon-tabler-circle-key-filled" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -21,10 +21,10 @@
                         <path d="M22 19l-3 -3l-3 3" />
                     </svg>
                     <h1 class="tw-dw-text-3xl tw-dw-font-bold"> {{ config('app.name', 'ultimatePOS') }} - @lang('business.register_and_get_started_in_minutes')</h1> --}}
-                    <h1 class="tw-text-lg md:tw-text-xl tw-font-semibold tw-text-[#1e1e1e]">
+                    <h1 class="tw-text-lg md:tw-text-xl tw-font-semibold">
                             {{ config('app.name', 'ultimatePOS') }}
                       </h1>
-                      <h2 class="tw-text-sm tw-font-medium tw-text-gray-500">
+                      <h2 class="tw-text-sm tw-font-medium vp-auth-text-muted">
                             @lang('business.register_and_get_started_in_minutes')
                       </h2>
                 </div>

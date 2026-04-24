@@ -28,6 +28,9 @@
                     <input type="hidden" name="discount_amount" id="discount_amount" value="@if (empty($edit)){{ @num_format($business_details->default_sales_discount) }}@else{{ @num_format($transaction->discount_amount) }}@endif" data-default="{{ $business_details->default_sales_discount }}">
                     <input type="hidden" name="rp_redeemed" id="rp_redeemed" value="@if (empty($edit)){{ '0' }}@else{{ $transaction->rp_redeemed }}@endif">
                     <input type="hidden" name="rp_redeemed_amount" id="rp_redeemed_amount" value="@if (empty($edit)){{ '0' }}@else{{ $transaction->rp_redeemed_amount }}@endif">
+                    <input type="hidden" name="customer_loyalty_tier" id="customer_loyalty_tier" value="">
+                    <input type="hidden" name="promotion_code" id="promotion_code" value="@if (empty($edit)){{ '' }}@else{{ $transaction->promotion_code }}@endif">
+                    <input type="hidden" name="promotion_discount_amount" id="promotion_discount_amount" value="@if (empty($edit)){{ '0' }}@else{{ $transaction->promotion_discount_amount }}@endif">
                 </div>
 
                 <div class="vp-pos-summary-item @if ($pos_settings['disable_order_tax'] != 0) hide @endif">

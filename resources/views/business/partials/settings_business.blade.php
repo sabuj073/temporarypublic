@@ -90,6 +90,16 @@
                 </div>
             </div>
         </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <br>
+                <label>
+                    {!! Form::checkbox('common_settings[enable_average_costing]', 1, !array_key_exists('enable_average_costing', $common_settings) || !empty($common_settings['enable_average_costing']), ['class' => 'input-icheck']); !!}
+                    {{ __('business.enable_average_costing') }}
+                </label>
+                <p class="help-block">@lang('business.enable_average_costing_help')</p>
+            </div>
+        </div>
         <div class="clearfix"></div>
         <div class="col-sm-4">
             <div class="form-group">

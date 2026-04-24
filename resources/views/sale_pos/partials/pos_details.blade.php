@@ -45,6 +45,8 @@
 									<input type="hidden" name="rp_redeemed" id="rp_redeemed" value="@if(empty($edit)){{'0'}}@else{{$transaction->rp_redeemed}}@endif">
 
 									<input type="hidden" name="rp_redeemed_amount" id="rp_redeemed_amount" value="@if(empty($edit)){{'0'}}@else {{$transaction->rp_redeemed_amount}} @endif">
+									<input type="hidden" name="promotion_code" id="promotion_code" value="@if(empty($edit)){{''}}@else {{$transaction->promotion_code}} @endif">
+									<input type="hidden" name="promotion_discount_amount" id="promotion_discount_amount" value="@if(empty($edit)){{'0'}}@else {{$transaction->promotion_discount_amount}} @endif">
 								</span>
 							@endif
 							</div>

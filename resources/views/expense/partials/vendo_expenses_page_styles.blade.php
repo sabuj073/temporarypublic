@@ -1,12 +1,4 @@
 <style id="vp-expenses-vendo-styles">
-    body.vp-expenses-vendo-page aside.side-bar.vp-custom-sidebar {
-        display: none !important;
-    }
-
-    body.vp-expenses-vendo-page .vp-side-btn {
-        display: none !important;
-    }
-
     /*
      * Export actions use position:fixed — they do not need padding on #scrollable-container.
      * Extra padding-bottom here only increased scrollHeight and forced an unnecessary vertical scrollbar.
@@ -18,8 +10,7 @@
 
     /*
      * Align outer frame with .vp-global-header: same margin (22px 26px), padding (10px 12px),
-     * border and radius. Do NOT use width:100% with horizontal margins — it overflows the row
-     * and reads wider than the header bar.
+     * border and radius. Constrain width so wide DataTables scroll inside .vp-expenses-table-wrap.
      */
     body.vp-expenses-vendo-page .vp-expenses-page-wrap {
         box-sizing: border-box;
@@ -29,9 +20,11 @@
         border: 1px solid rgba(255, 255, 255, 0.35);
         background: linear-gradient(140deg, rgba(51, 80, 142, 0.45) 0%, rgba(35, 57, 118, 0.5) 100%);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        /* Same outer width rules as .vp-global-header — avoid width:100% + lateral margins overflow */
         width: auto;
-        max-width: none;
+        max-width: calc(100vw - 52px);
         min-width: 0;
+        overflow-x: hidden;
     }
 
     body.vp-expenses-vendo-page .vp-expenses-shell {
@@ -238,18 +231,38 @@
 
     body.vp-expenses-vendo-page .vp-expenses-table-wrap {
         padding: 0 8px 8px;
+        width: 100%;
         max-width: 100%;
         min-width: 0;
         overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.vp-expenses-vendo-page .vp-expenses-table-wrap .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+        margin: 0;
     }
 
     body.vp-expenses-vendo-page #expense_table_wrapper {
         width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.vp-expenses-vendo-page #expense_table_wrapper .dataTables_scroll,
+    body.vp-expenses-vendo-page #expense_table_wrapper .dataTables_scrollHead,
+    body.vp-expenses-vendo-page #expense_table_wrapper .dataTables_scrollBody {
+        max-width: 100%;
     }
 
     body.vp-expenses-vendo-page #expense_table {
         margin: 0 !important;
-        table-layout: fixed;
+        table-layout: auto;
         width: 100% !important;
     }
 
@@ -415,9 +428,45 @@
     }
 
     @media (max-width: 991px) {
+        /*
+         * layouts/app.blade.php (≤991px) forces overflow:visible on .vp-*-card / -table-wrap / DataTables
+         * wrappers — keep the expense table + tfoot "Total" bar inside the white card (empty or not).
+         */
+        body.vp-expenses-vendo-page #scrollable-container .vp-expenses-card {
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+        }
+
+        body.vp-expenses-vendo-page #scrollable-container .vp-expenses-table-wrap,
+        body.vp-expenses-vendo-page #scrollable-container .vp-expenses-table-wrap .table-responsive,
+        body.vp-expenses-vendo-page #scrollable-container #expense_table_wrapper {
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+
         body.vp-expenses-vendo-page .vp-expenses-page-wrap {
-            margin: 14px 12px 16px;
-            padding: 10px 12px;
+            margin: 14px 10px 16px;
+            padding: 10px 10px;
+            width: auto;
+            max-width: calc(100vw - 20px);
+        }
+
+        body.vp-expenses-vendo-page #expense_table thead th,
+        body.vp-expenses-vendo-page #expense_table tbody td,
+        body.vp-expenses-vendo-page #expense_table tfoot th,
+        body.vp-expenses-vendo-page #expense_table tfoot td {
+            width: auto !important;
+            min-width: 120px;
+            white-space: nowrap;
+        }
+
+        body.vp-expenses-vendo-page #expense_table thead th:last-child,
+        body.vp-expenses-vendo-page #expense_table tbody td:last-child,
+        body.vp-expenses-vendo-page #expense_table tfoot th:last-child,
+        body.vp-expenses-vendo-page #expense_table tfoot td:last-child {
+            min-width: 140px;
         }
     }
 

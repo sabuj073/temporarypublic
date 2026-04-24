@@ -174,12 +174,21 @@ class BusinessUtil extends Util
      *
      * @return array
      */
-    public function allAccountingMethods()
+    public function allAccountingMethods($common_settings = [], $current_method = null)
     {
-        return [
+        $accounting_methods = [
             'fifo' => __('business.fifo'),
             'lifo' => __('business.lifo'),
         ];
+
+        $enable_average_costing = ! array_key_exists('enable_average_costing', $common_settings) ||
+            ! empty($common_settings['enable_average_costing']);
+
+        if ($enable_average_costing || $current_method == 'avco') {
+            $accounting_methods['avco'] = __('business.avco');
+        }
+
+        return $accounting_methods;
     }
 
     /**

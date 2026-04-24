@@ -61,6 +61,14 @@
 		</div>
 	</div>
 </div>
+<div class="payment_details_div @if( $payment_line->method !== 'gift_card' ) {{ 'hide' }} @endif" data-type="gift_card" >
+	<div class="col-md-12">
+		<div class="form-group">
+			{!! Form::label("gift_card_number", __('lang_v1.gift_card_number')) !!}
+			{!! Form::text("gift_card_number", $payment_line->transaction_no, ['class' => 'form-control', 'placeholder' => __('lang_v1.gift_card_number')]); !!}
+		</div>
+	</div>
+</div>
 <div class="payment_details_div @if( $payment_line->method !== 'custom_pay_1' ) {{ 'hide' }} @endif" data-type="custom_pay_1" >
 	<div class="col-md-12">
 		<div class="form-group">

@@ -64,6 +64,80 @@ $(document).ready(function() {
         if ($('#types_of_service_id').length && $('#types_of_service_id').val()) {
             $('#types_of_service_id').change();
         }
+
+        // Keep global header location pill in sync with POS sale location
+        if ($('select[name="dashboard_location_mirror"]').length) {
+            $('select[name="dashboard_location_mirror"]').val($(this).val());
+        }
+    });
+
+    /*
+     * Global navbar uses select[name="dashboard_location_mirror"] (class .vp-global-select-location).
+     * POS sale location is select#select_location_id + input#location_id. Changing only the header
+     * used to leave POS on the old location — sync by driving the POS location change handler.
+     */
+    $(document).on('change', 'select.vp-global-select-location, select[name="dashboard_location_mirror"]', function () {
+        if (!$('body.vp-pos-page').length) {
+            return;
+        }
+        // Only create POS: syncing into edit flow would call reset_pos_form() which redirects away.
+        if (!$('form#add_pos_sell_form').length) {
+            return;
+        }
+        var newId = $(this).val();
+        var $posSel = $('#select_location_id');
+        if ($posSel.length) {
+            if ($posSel.find('option[value="' + newId + '"]').length) {
+                if (String($posSel.val()) !== String(newId)) {
+                    $posSel.val(newId).trigger('change');
+                }
+            } else {
+                $('input#location_id').val(newId);
+                $('input#suggestion_page').val(1);
+                var is_en_stock = $('#is_enabled_stock').length ? $('#is_enabled_stock').val() : null;
+                var repair_model = $('#repair_model_id').length ? $('#repair_model_id').val() : null;
+                if (typeof get_product_suggestion_list === 'function') {
+                    get_product_suggestion_list(
+                        global_p_category_id,
+                        global_brand_id,
+                        newId,
+                        null,
+                        is_en_stock,
+                        repair_model
+                    );
+                }
+                if (typeof get_featured_products === 'function') {
+                    get_featured_products();
+                }
+                if (typeof set_payment_type_dropdown === 'function') {
+                    set_payment_type_dropdown();
+                }
+                if (typeof set_location === 'function') {
+                    set_location();
+                }
+            }
+        } else {
+            $('input#location_id').val(newId);
+            $('input#suggestion_page').val(1);
+            var is_en_stock2 = $('#is_enabled_stock').length ? $('#is_enabled_stock').val() : null;
+            var repair_model2 = $('#repair_model_id').length ? $('#repair_model_id').val() : null;
+            if (typeof get_product_suggestion_list === 'function') {
+                get_product_suggestion_list(
+                    global_p_category_id,
+                    global_brand_id,
+                    newId,
+                    null,
+                    is_en_stock2,
+                    repair_model2
+                );
+            }
+            if (typeof get_featured_products === 'function') {
+                get_featured_products();
+            }
+            if (typeof set_location === 'function') {
+                set_location();
+            }
+        }
     });
 
     //get customer
@@ -949,6 +1023,10 @@ $(document).ready(function() {
         //Update values
         $('input#discount_type').val($('select#discount_type_modal').val());
         __write_number($('input#discount_amount'), __read_number($('input#discount_amount_modal')));
+        $('input#promotion_code').val($('#promotion_code_modal').val().trim());
+        if ($('#promotion_discount_amount_modal').length && $('#promotion_discount_amount').length) {
+            __write_number($('input#promotion_discount_amount'), __read_number($('#promotion_discount_amount_modal')));
+        }
 
         if ($('#reward_point_enabled').length) {
             var reward_validation = isValidatRewardPoint();
@@ -961,6 +1039,10 @@ $(document).ready(function() {
         }
 
         pos_total_row();
+    });
+
+    $(document).on('click', '#apply_promotion_code', function() {
+        validatePromotionForCurrentCart(true);
     });
 
     //Shipping
@@ -1291,13 +1373,32 @@ $(document).ready(function() {
     
     $('select#select_location_id').on('change', function(e) {
         $('input#suggestion_page').val(1);
-        var location_id = $('input#location_id').val();
-        if (location_id != '' || location_id != undefined) {
+        // Always take the value from the dropdown that fired the event — #location_id can still be the
+        // previous location until set_location() runs (e.g. after form.reset() in reset_pos_form()).
+        var location_id = $(this).val();
+        if (location_id) {
+            $('input#location_id').val(location_id);
+            var $opt = $(this).find(':selected');
+            $('input#location_id').data('receipt_printer_type', $opt.data('receipt_printer_type'));
+            $('input#location_id').data('default_payment_accounts', $opt.data('default_payment_accounts'));
+            $('input#location_id').attr('data-default_price_group', $opt.data('default_price_group'));
+        }
+        var is_en_stock = null;
+        if ($('#is_enabled_stock').length) {
+            is_en_stock = $('#is_enabled_stock').val();
+        }
+        var repair_model = null;
+        if ($('#repair_model_id').length) {
+            repair_model = $('#repair_model_id').val();
+        }
+        if (location_id) {
             get_product_suggestion_list(
                 global_p_category_id,
                 global_brand_id,
-                $('input#location_id').val(),
-                null
+                location_id,
+                null,
+                is_en_stock,
+                repair_model
             );
         }
         get_featured_products();
@@ -1604,6 +1705,30 @@ $(document).ready(function() {
         } else{
             $('input#weighing_scale_barcode').focus();
         }
+    });
+
+    $('button#weighing_scale_read_live').click(function() {
+        $.ajax({
+            method: 'GET',
+            url: '/integrations/scale/read',
+            dataType: 'json',
+            success: function(result) {
+                if (result.success) {
+                    if (result.barcode) {
+                        $('input#weighing_scale_barcode').val(result.barcode);
+                    } else if (result.weight) {
+                        toastr.info('Scale weight: ' + result.weight + ' ' + (result.unit || 'kg'));
+                    } else {
+                        toastr.info('Scale responded without barcode');
+                    }
+                } else {
+                    toastr.error(result.message || 'Failed to read from scale');
+                }
+            },
+            error: function() {
+                toastr.error('Failed to connect scale integration');
+            }
+        });
     });
 
     $('#show_featured_products').click( function(){
@@ -2050,7 +2175,98 @@ function pos_total_row() {
     }
     // store on any update
     saveFormDataToLocalStorage();
+    schedulePromotionValidation(false);
 
+}
+
+let promotionValidationTimer = null;
+let promotionValidationInFlight = false;
+let promotionValidationSkipOnce = false;
+let lastPromotionValidationSignature = '';
+
+function getPromotionValidationSignature() {
+    return JSON.stringify({
+        rows: $('table#pos_table tbody tr').length,
+        subtotal: get_subtotal(),
+        contact_id: $('#customer_id').val() || '',
+        promotion_code: ($('#promotion_code').val() || $('#promotion_code_modal').val() || '').trim()
+    });
+}
+
+function schedulePromotionValidation(showToast) {
+    if (!$('form#add_pos_sell_form').length || $('#promotion_discount_amount').length <= 0) {
+        return;
+    }
+    if (promotionValidationSkipOnce) {
+        promotionValidationSkipOnce = false;
+        return;
+    }
+    clearTimeout(promotionValidationTimer);
+    promotionValidationTimer = setTimeout(function() {
+        validatePromotionForCurrentCart(showToast === true);
+    }, 300);
+}
+
+function validatePromotionForCurrentCart(showToast) {
+    if (!$('form#add_pos_sell_form').length || $('#promotion_discount_amount').length <= 0) {
+        return;
+    }
+    if (promotionValidationInFlight) {
+        return;
+    }
+
+    const signature = getPromotionValidationSignature();
+    if (!showToast && signature === lastPromotionValidationSignature) {
+        return;
+    }
+    lastPromotionValidationSignature = signature;
+
+    var promo_code = ($('#promotion_code_modal').val() || $('#promotion_code').val() || '').trim();
+    var payload = $('#add_pos_sell_form').serializeArray();
+    payload.push({ name: 'promotion_code', value: promo_code });
+
+    promotionValidationInFlight = true;
+    $.ajax({
+        method: 'POST',
+        url: '/promotions/validate-cart',
+        data: payload,
+        dataType: 'json',
+        success: function(result) {
+            if (result.success) {
+                var newDiscount = parseFloat(result.discount_amount) || 0;
+                var currentDiscount = __read_number($('#promotion_discount_amount')) || 0;
+                var resolvedCode = result.promotion_code || promo_code;
+
+                $('#promotion_discount_amount_text').text(__currency_trans_from_en(newDiscount, false));
+                $('#promotion_discount_amount_modal').val(newDiscount);
+                $('input#promotion_discount_amount').val(newDiscount);
+                $('input#promotion_code').val(resolvedCode);
+
+                if (showToast) {
+                    if (newDiscount > 0) {
+                        toastr.success('Promotion applied');
+                    } else {
+                        toastr.warning('No matching promotion found');
+                    }
+                }
+
+                if (Math.abs(newDiscount - currentDiscount) > 0.0001) {
+                    promotionValidationSkipOnce = true;
+                    pos_total_row();
+                }
+            } else if (showToast) {
+                toastr.error(result.message || 'Could not validate promotion');
+            }
+        },
+        error: function() {
+            if (showToast) {
+                toastr.error('Could not validate promotion');
+            }
+        },
+        complete: function() {
+            promotionValidationInFlight = false;
+        }
+    });
 }
 
 function get_subtotal() {
@@ -2081,6 +2297,15 @@ function calculate_billing_details(price_total) {
             $('span#total_discount').text(__currency_trans_from_en(discount, false));
         }
     }
+    var promotion_discount = $('#promotion_discount_amount').length ? __read_number($('#promotion_discount_amount')) : 0;
+    if (isNaN(promotion_discount)) {
+        promotion_discount = 0;
+    }
+    discount = parseFloat(discount) + parseFloat(promotion_discount);
+    if ($('#promotion_discount_amount_text').length) {
+        $('#promotion_discount_amount_text').text(__currency_trans_from_en(promotion_discount, false));
+    }
+    $('span#total_discount').text(__currency_trans_from_en(discount, false));
 
     var order_tax = pos_order_tax(price_total, discount);
 
@@ -2217,6 +2442,107 @@ function calculate_balance_due() {
     // store payment details
     saveFormDataToLocalStorage();
 }
+
+var gift_card_balance_lookup_timer = null;
+var gift_card_lookup_xhr = null;
+
+function posGiftCardRemainingForRow($gift_input) {
+    var $row = $gift_input.closest('.payment_row');
+    var total_payable = __read_number($('#final_total_input'));
+    var other = 0;
+    $('#payment_rows_div .payment_row').each(function() {
+        if (this === $row[0]) {
+            return;
+        }
+        other += __read_number($(this).find('.payment-amount').first());
+    });
+    var rem = total_payable - other;
+    if (isNaN(rem) || rem < 0) {
+        rem = 0;
+    }
+    return rem;
+}
+
+function posApplyGiftCardBalanceFromLookup($inp, silent) {
+    if (!$inp || !$inp.length) {
+        return;
+    }
+    var $row = $inp.closest('.payment_row');
+    if ($row.find('.payment_types_dropdown').val() !== 'gift_card') {
+        return;
+    }
+    var raw = ($inp.val() || '').trim().toUpperCase();
+    if (!raw) {
+        return;
+    }
+    if (gift_card_lookup_xhr && gift_card_lookup_xhr.readyState !== 4) {
+        gift_card_lookup_xhr.abort();
+    }
+    gift_card_lookup_xhr = $.ajax({
+        method: 'POST',
+        url: '/gift-cards/lookup-balance',
+        dataType: 'json',
+        data: { card_number: raw },
+        success: function(resp) {
+            if (!resp.success) {
+                if (!silent) {
+                    toastr.error(resp.msg || LANG.something_went_wrong);
+                }
+                return;
+            }
+            var bal = parseFloat(resp.current_balance);
+            if (isNaN(bal)) {
+                if (!silent) {
+                    toastr.error(LANG.something_went_wrong);
+                }
+                return;
+            }
+            var cap = posGiftCardRemainingForRow($inp);
+            var apply = Math.min(bal, cap);
+            var $amt = $row.find('.payment-amount').first();
+            __write_number($amt, apply);
+            $amt.trigger('change');
+            calculate_balance_due();
+            if (!silent) {
+                if (apply > 0) {
+                    toastr.success(
+                        'Gift card verified. Applied ' +
+                            __currency_trans_from_en(apply, true) +
+                            ' (balance due in orange updates for cash/card).'
+                    );
+                } else if (bal <= 0) {
+                    toastr.warning('Gift card balance is zero.');
+                } else {
+                    toastr.info('Order balance already covered by other payment rows.');
+                }
+            }
+        },
+        error: function(xhr) {
+            if (xhr.statusText === 'abort') {
+                return;
+            }
+            var msg =
+                xhr.responseJSON && xhr.responseJSON.msg
+                    ? xhr.responseJSON.msg
+                    : xhr.statusText || LANG.something_went_wrong;
+            if (!silent) {
+                toastr.error(msg);
+            }
+        },
+    });
+}
+
+$(document).on('blur', '#modal_payment input[name*="[gift_card_number]"]', function() {
+    posApplyGiftCardBalanceFromLookup($(this), false);
+});
+
+$(document).on('keyup', '#modal_payment input[name*="[gift_card_number]"]', function() {
+    var $inp = $(this);
+    clearTimeout(gift_card_balance_lookup_timer);
+    gift_card_balance_lookup_timer = setTimeout(function() {
+        posApplyGiftCardBalanceFromLookup($inp, true);
+    }, 650);
+});
 
 function isValidPosForm() {
     flag = true;
@@ -2379,27 +2705,16 @@ function set_default_customer() {
 
 //Set the location and initialize printer
 function set_location() {
-    if ($('select#select_location_id').length == 1) {
-        $('input#location_id').val($('select#select_location_id').val());
-        $('input#location_id').data(
-            'receipt_printer_type',
-            $('select#select_location_id')
-                .find(':selected')
-                .data('receipt_printer_type')
-        );
-        $('input#location_id').data(
-            'default_payment_accounts',
-            $('select#select_location_id')
-                .find(':selected')
-                .data('default_payment_accounts')
-        );
-
-        $('input#location_id').attr(
-            'data-default_price_group',
-            $('select#select_location_id')
-                .find(':selected')
-                .data('default_price_group')
-        );
+    // Use .first() and truthy length — strict `length == 1` skipped sync when duplicate nodes existed
+    // or other edge cases, so POS kept the old #location_id and product suggestions stayed on the wrong location.
+    var $locSelect = $('select#select_location_id');
+    if ($locSelect.length) {
+        var $sel = $locSelect.first();
+        var $selected = $sel.find(':selected');
+        $('input#location_id').val($sel.val());
+        $('input#location_id').data('receipt_printer_type', $selected.data('receipt_printer_type'));
+        $('input#location_id').data('default_payment_accounts', $selected.data('default_payment_accounts'));
+        $('input#location_id').attr('data-default_price_group', $selected.data('default_price_group'));
     }
 
     if ($('input#location_id').val()) {
@@ -2623,6 +2938,7 @@ function getCustomerRewardPoints() {
         success: function(result) {
             $('#available_rp').text(result.points);
             $('#rp_redeemed_modal').data('max_points', result.points);
+            $('#customer_loyalty_tier').val(result.loyalty_tier || '');
             updateRedeemedAmount();
             $('#rp_redeemed_amount').change()
         },
@@ -2798,15 +3114,36 @@ $(document).on('click', '.service_modal_btn', function(e) {
 });
 
 $(document).on('change', '.payment_types_dropdown', function(e) {
-    var default_accounts = $('select#select_location_id').length ? 
-                $('select#select_location_id')
-                .find(':selected')
-                .data('default_payment_accounts') : $('#location_id').data('default_payment_accounts');
     var payment_type = $(this).val();
     var payment_row = $(this).closest('.payment_row');
+
+    // Show card/cheque/bank/gift-card fields for this row (mirrors app.js). Keeps POS working if app.js
+    // document.ready stopped before binding the same handler (e.g. missing DataTable targets on POS-only pages).
+    var to_show = null;
+    payment_row.find('.payment_details_div').each(function() {
+        if ($(this).attr('data-type') == payment_type) {
+            to_show = $(this);
+        } else if (!$(this).hasClass('hide')) {
+            $(this).addClass('hide');
+        }
+    });
+    if (to_show && to_show.hasClass('hide')) {
+        to_show.removeClass('hide');
+        to_show
+            .find('input')
+            .filter(':visible:first')
+            .focus();
+    }
+
+    var default_accounts = $('select#select_location_id').length
+        ? $('select#select_location_id')
+              .find(':selected')
+              .data('default_payment_accounts')
+        : $('#location_id').data('default_payment_accounts');
     if (payment_type && payment_type != 'advance') {
-        var default_account = default_accounts && default_accounts[payment_type]['account'] ? 
-            default_accounts[payment_type]['account'] : '';
+        var type_cfg =
+            default_accounts && default_accounts[payment_type] ? default_accounts[payment_type] : null;
+        var default_account = type_cfg && type_cfg.account ? type_cfg.account : '';
         var row_index = payment_row.find('.payment_row_index').val();
 
         var account_dropdown = payment_row.find('select#account_' + row_index);
@@ -2838,6 +3175,13 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
             account_dropdown.prop('disabled', false); 
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
+    }
+
+    if (payment_type === 'gift_card') {
+        var $gcNum = payment_row.find('input[name*="[gift_card_number]"]');
+        if ($gcNum.length && $.trim($gcNum.val())) {
+            posApplyGiftCardBalanceFromLookup($gcNum, true);
+        }
     }
 });
 
@@ -3474,6 +3818,15 @@ function saveFormDataToLocalStorage() {
     // Serialize form data into an array of objects: [{name: 'input_name', value: 'input_value'}, ...]
     let formArray = form.serializeArray();
 
+    function upsertField(fieldName, fieldValue) {
+        let idx = formArray.findIndex(item => item.name === fieldName);
+        if (idx !== -1) {
+            formArray[idx].value = fieldValue;
+        } else {
+            formArray.push({ name: fieldName, value: fieldValue });
+        }
+    }
+
     // Find if "price_total" already exists in the array
     let priceIndex = formArray.findIndex(item => item.name === "price_total");
 
@@ -3537,6 +3890,15 @@ function saveFormDataToLocalStorage() {
          formArray.push({ name: "in_balance_due", value: $("#in_balance_due").val()});
      }
     // Store serialized data in LocalStorage as a JSON string
+    upsertField('ui_total_discount', $('#total_discount').text().trim());
+    upsertField('ui_order_tax', $('#order_tax').text().trim());
+    upsertField('ui_shipping', $('#shipping_charges_amount').text().trim());
+    upsertField('ui_total_payable', $('#total_payable').text().trim());
+    upsertField('ui_promotion_code', $('#promotion_code').val() || '');
+    upsertField('ui_promotion_discount', $('#promotion_discount_amount').val() || 0);
+    upsertField('ui_rp_redeemed', $('#rp_redeemed').val() || 0);
+    upsertField('ui_rp_redeemed_amount', $('#rp_redeemed_amount').val() || 0);
+
     localStorage.setItem("pos_form_data_array", JSON.stringify(formArray));
 
     // console.log("Form data successfully saved to LocalStorage.");

@@ -111,6 +111,11 @@ class Contact extends Authenticatable
         return $this->morphMany(\App\DocumentAndNote::class, 'notable');
     }
 
+    public function loyalty_tier()
+    {
+        return $this->belongsTo(\App\LoyaltyTier::class, 'loyalty_tier_id');
+    }
+
     /**
      * Return list of contact dropdown for a business
      *

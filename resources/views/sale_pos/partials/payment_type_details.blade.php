@@ -61,6 +61,14 @@
 		</div>
 	</div>
 </div>
+<div class="payment_details_div @if( $payment_line['method'] !== 'gift_card' ) {{ 'hide' }} @endif" data-type="gift_card" >
+	<div class="col-md-12">
+		<div class="form-group">
+			{!! Form::label("gift_card_number_$row_index",__('lang_v1.gift_card_number')) !!}
+			{!! Form::text("payment[$row_index][gift_card_number]", $payment_line['gift_card_number'] ?? $payment_line['transaction_no'] ?? '', ['class' => 'form-control', 'placeholder' => __('lang_v1.gift_card_number'), 'id' => "gift_card_number_$row_index"]); !!}
+		</div>
+	</div>
+</div>
 
 @for ($i = 1; $i < 8; $i++)
 <div class="payment_details_div @if( $payment_line['method'] !== 'custom_pay_' . $i ) {{ 'hide' }} @endif" data-type="custom_pay_{{$i}}" >

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', __( 'connector::lang.clients' ))
 
-@section('vue')
+@section('content')
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>@lang( 'connector::lang.clients' )</h1>
@@ -87,7 +87,7 @@
   </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
 </div>
-@stop
+@endsection
 @section('javascript')
 <script type="text/javascript">
 	$(document).ready( function(){

@@ -399,6 +399,24 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->segment(1) == 'import-sales']
                             );
                         }
+
+                        if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create'])) {
+                            $sub->url(
+                                action([\App\Http\Controllers\GiftCardController::class, 'index']),
+                                __('lang_v1.gift_cards'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'gift-cards']
+                            );
+                            $sub->url(
+                                action([\App\Http\Controllers\PromotionController::class, 'index']),
+                                __('lang_v1.promotions_engine'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'promotions']
+                            );
+                            $sub->url(
+                                action([\App\Http\Controllers\LoyaltyTierController::class, 'index']),
+                                __('lang_v1.loyalty_tiers'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'loyalty-tiers']
+                            );
+                        }
                     },
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -408,6 +426,22 @@ class AdminSidebarMenu
                     <path d="M3 12a9 9 0 0 0 18 0"></path>
                   </svg>', 'id' => 'tour_step7']
                 )->order(30);
+            }
+
+            if ($is_admin || auth()->user()->hasAnyPermission(['sell.view', 'sell.create'])) {
+                $menu->url(
+                    action([\App\Http\Controllers\GiftCardController::class, 'index']),
+                    __('lang_v1.gift_cards'),
+                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-8z"></path>
+                    <path d="M16 7v4"></path>
+                    <path d="M8 7v4"></path>
+                    <path d="M3 13h18"></path>
+                    <path d="M8 17h.01"></path>
+                    <path d="M12 17h.01"></path>
+                  </svg>', 'active' => request()->segment(1) == 'gift-cards']
+                )->order(31);
             }
 
             //Stock transfer dropdown
@@ -731,6 +765,11 @@ class AdminSidebarMenu
                                 __('lang_v1.activity_log'),
                                 ['icon' => '', 'active' => request()->segment(2) == 'activity-log']
                             );
+                            $sub->url(
+                                action([\App\Http\Controllers\LoyaltyAnalyticsController::class, 'index']),
+                                __('lang_v1.loyalty_program_analytics'),
+                                ['icon' => '', 'active' => request()->segment(2) == 'loyalty-analytics']
+                            );
                         }
                     },
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -756,17 +795,6 @@ class AdminSidebarMenu
                 <path d="M19 22v-6"></path>
                 <path d="M22 19l-3 -3l-3 3"></path>
               </svg>', 'active' => request()->segment(1) == 'backup'])->order(60);
-            }
-
-            //Modules menu
-            if (auth()->user()->can('manage_modules')) {
-                $menu->url(action([\App\Http\Controllers\Install\ModulesController::class, 'index']), __('lang_v1.modules'), ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M12 4l-8 4l8 4l8 -4l-8 -4"></path>
-              <path d="M4 12l8 4l8 -4"></path>
-              <path d="M4 16l8 4l8 -4"></path>
-            </svg>', 'active' => request()->segment(1) == 'manage-modules'])->order(60);
             }
 
             //Booking menu

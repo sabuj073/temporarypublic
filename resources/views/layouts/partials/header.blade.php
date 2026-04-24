@@ -36,7 +36,6 @@
         : 'https://ui-avatars.com/api/?name=' . urlencode($fullName);
 
     $segment1 = $request->segment(1);
-    $isHomeDashboardHeader = $segment1 === 'home' && empty($request->segment(2));
     $topNav = [
         ['label' => 'Home', 'url' => action([\App\Http\Controllers\HomeController::class, 'index']), 'active' => $segment1 === 'home', 'icon_path' => 'images/dashboard-icons/nav/home.png', 'fallback_icon' => 'fa-home'],
         ['label' => 'Sales', 'url' => action([\App\Http\Controllers\SellController::class, 'index']), 'active' => in_array($segment1, ['sells', 'sell', 'purchases', 'stock-transfers', 'stock-adjustments']), 'icon_path' => 'images/dashboard-icons/nav/sales.png', 'fallback_icon' => 'fa-bar-chart'],
@@ -48,16 +47,15 @@
 <div class="vp-global-header no-print">
     <div class="vp-global-inner">
         <div class="vp-global-left">
-            @if (!$isHomeDashboardHeader)
-                <button type="button" class="small-view-button vp-side-btn">
-                    <span class="tw-sr-only">Sidebar Menu</span>
-                    @if (!empty($sidebarToggleIconPath))
-                        <img src="{{ $sidebarToggleIconPath }}" alt="Sidebar menu" class="vp-side-btn-icon-image">
-                    @else
-                        <i class="fa fa-bars" aria-hidden="true"></i>
-                    @endif
-                </button>
-            @endif
+            {{-- Shown on every route that renders this header; hidden on main dashboard via body.vp-home-dashboard (see styles below). --}}
+            <button type="button" class="small-view-button vp-side-btn">
+                <span class="tw-sr-only">Sidebar Menu</span>
+                @if (!empty($sidebarToggleIconPath))
+                    <img src="{{ $sidebarToggleIconPath }}" alt="Sidebar menu" class="vp-side-btn-icon-image">
+                @else
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                @endif
+            </button>
 
             <a href="{{ action([\App\Http\Controllers\HomeController::class, 'index']) }}" class="vp-global-logo-wrap">
                 @if (!empty($logoPath))
@@ -137,6 +135,11 @@
 </div>
 
 <style>
+    /* Main /home dashboard only: no sidebar toggle in the global header. */
+    body.vp-home-dashboard .vp-global-header .vp-side-btn {
+        display: none !important;
+    }
+
     .vp-global-header {
         margin: 22px 26px 0;
         padding: 10px 12px;
@@ -542,6 +545,54 @@
 
         .vp-admin-text small {
             font-size: 12px;
+        }
+    }
+
+    /*
+     * Top bar (logo + location + time vs Home/Sales/…): below ~1200px one row is too tight and
+     * pills collide with nav — split into two rows. (This is NOT the left app menu drawer.)
+     */
+    @media (max-width: 1199px) {
+        .vp-global-inner {
+            flex-wrap: wrap;
+            align-items: stretch;
+            row-gap: 8px;
+        }
+
+        .vp-global-left {
+            flex: 1 1 100%;
+            min-width: 0;
+            flex-wrap: wrap;
+            row-gap: 6px;
+        }
+
+        .vp-global-right {
+            flex: 1 1 100%;
+            min-width: 0;
+            justify-content: space-between;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .vp-global-meta {
+            flex-wrap: wrap;
+        }
+
+        .vp-global-pill {
+            font-size: 11px;
+            height: 28px;
+            padding: 0 8px;
+        }
+
+        .vp-global-nav-link {
+            font-size: 12px;
+            height: 32px;
+            padding: 0 10px;
+        }
+
+        .vp-global-nav-icon-image {
+            width: 18px;
+            height: 18px;
         }
     }
 

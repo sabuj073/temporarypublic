@@ -30,7 +30,7 @@
         display: flex !important;
         flex-direction: column;
         min-height: 100vh !important;
-        padding-top: 0.5rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 1.5rem !important;
     }
 
@@ -38,6 +38,8 @@
         flex: 0 0 auto;
         min-height: 4.25rem;
         position: relative;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
 
     html.vp-login-dashboard-page .vp-login-page-center-wrap {
@@ -218,5 +220,123 @@
     html.vp-login-dashboard-page .vp-login-shell .help-block,
     html.vp-login-dashboard-page .vp-login-shell .help-block strong {
         color: #fecaca !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card {
+        width: 100%;
+        border-radius: 12px;
+        padding: 1.15rem 1.2rem;
+        background: linear-gradient(140deg, rgba(63, 102, 156, 0.42) 0%, rgba(35, 63, 127, 0.5) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.35) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 16px 40px rgba(3, 6, 27, 0.42) !important;
+        color: #fff !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .vp-auth-text-muted {
+        color: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card label,
+    html.vp-login-dashboard-page .vp-auth-card legend,
+    html.vp-login-dashboard-page .vp-auth-card h1,
+    html.vp-login-dashboard-page .vp-auth-card h2,
+    html.vp-login-dashboard-page .vp-auth-card h3,
+    html.vp-login-dashboard-page .vp-auth-card h4 {
+        color: #fff !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .input-group-addon {
+        border-color: rgba(255, 255, 255, 0.28) !important;
+        background: rgba(12, 18, 46, 0.45) !important;
+        color: rgba(255, 255, 255, 0.88) !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .form-control {
+        border-color: rgba(255, 255, 255, 0.28) !important;
+        background: rgba(12, 18, 46, 0.45) !important;
+        color: #fff !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.52) !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .form-control:focus {
+        border-color: rgba(147, 197, 253, 0.65) !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .select2-container--default .select2-selection--single {
+        border-color: rgba(255, 255, 255, 0.28) !important;
+        background: rgba(12, 18, 46, 0.45) !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #fff !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-card .select2-selection__arrow b {
+        border-color: rgba(255, 255, 255, 0.75) transparent transparent transparent !important;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-submit {
+        width: 100%;
+        height: 3rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        margin-top: 0.6rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #fff !important;
+        background: linear-gradient(140deg, rgba(88, 130, 190, 0.95) 0%, rgba(44, 78, 150, 0.98) 100%);
+        box-shadow: 0 8px 22px rgba(8, 14, 42, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    html.vp-login-dashboard-page .vp-auth-submit:hover {
+        color: #fff !important;
+        filter: brightness(1.06);
+        box-shadow: 0 12px 28px rgba(8, 14, 42, 0.45);
+    }
+
+    @media (max-width: 767px) {
+        /*
+         * Stack header + form as one block, vertically centered in the viewport,
+         * with a fixed gap between the top bar and the card (demo mode stays top-aligned).
+         */
+        html.vp-login-dashboard-page .right-col {
+            min-height: 100vh !important;
+            min-height: 100dvh !important;
+            justify-content: center;
+            align-items: stretch;
+            gap: 1.5rem;
+            padding-top: 1rem !important;
+            padding-bottom: 1.25rem !important;
+            box-sizing: border-box;
+        }
+
+        html.vp-login-dashboard-page .right-col:has(.vp-login-demo-col:not(.hidden)) {
+            justify-content: flex-start;
+        }
+
+        html.vp-login-dashboard-page .right-col > .row:first-of-type {
+            flex: 0 0 auto;
+            min-height: auto;
+        }
+
+        html.vp-login-dashboard-page .vp-login-page-center-wrap {
+            flex: 0 1 auto !important;
+            min-height: 0 !important;
+            justify-content: flex-start;
+            padding-top: 0;
+        }
+
+        html.vp-login-dashboard-page .vp-login-page-center-wrap > .vp-login-root-row {
+            max-width: 460px;
+        }
+
+        html.vp-login-dashboard-page .vp-auth-card {
+            padding: 1rem 0.9rem;
+        }
     }
 </style>

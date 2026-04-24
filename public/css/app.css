@@ -695,7 +695,22 @@ tr.details td.details-control {
 }
 @media print{
     .print_section{
-        display: inline !important;
+        display: block !important;
+        width: 100% !important;
+    }
+    /* Override AdminLTE .invoice-col { width: 33.33% } so sell/POS invoices don’t overlap columns */
+    #receipt_section .row.invoice-info {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+    }
+    #receipt_section .row.invoice-info > .invoice-col.width-50,
+    #receipt_section .invoice .invoice-col.width-50 {
+        flex: 0 0 50% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        float: none !important;
+        box-sizing: border-box !important;
     }
     .modal-xl{
         width: 100% !important;

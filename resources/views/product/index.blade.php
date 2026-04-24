@@ -630,6 +630,85 @@
                 padding: 0 12px !important;
             }
         }
+
+        /*
+         * Phones: right toolbar still laid out as one horizontal flex (length + Add + Excel),
+         * which overflows ~430px viewports — stack vertically and full-width controls.
+         */
+        @media (max-width: 767px) {
+            .vp-product-top-actions {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+
+            .vp-product-top-actions-left,
+            .vp-product-top-actions-right {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .vp-product-top-actions-right {
+                justify-content: flex-start !important;
+                gap: 8px !important;
+            }
+
+            .vp-product-top-actions-right .dataTables_length,
+            .vp-product-top-actions-right .vp-product-add-btn,
+            .vp-product-top-actions-right .vp-product-download-btn {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+            }
+
+            .vp-product-top-actions .dataTables_length select,
+            .vp-product-top-actions .dataTables_filter input {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+            }
+
+            .vp-product-add-btn,
+            .vp-product-download-btn {
+                justify-content: center !important;
+            }
+
+            .vp-products-content .dt-buttons,
+            .vp-products-content .vp-product-export-actions .dt-buttons {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 12px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .vp-products-content .dt-buttons > .btn-group,
+            .vp-products-content .vp-product-export-actions .dt-buttons > .btn-group {
+                display: contents !important;
+            }
+
+            .vp-products-content .dt-buttons > .dt-button,
+            .vp-products-content .dt-buttons > .btn,
+            .vp-products-content .vp-product-export-actions .dt-buttons > .dt-button,
+            .vp-products-content .vp-product-export-actions .dt-buttons > .btn {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                float: none !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+                overflow-wrap: break-word !important;
+            }
+
+            .vp-products-content .dt-buttons > *:last-child,
+            .vp-products-content .vp-product-export-actions .dt-buttons > *:last-child {
+                margin-left: 30px !important;
+            }
+        }
     </style>
 @endsection
 

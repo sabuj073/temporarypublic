@@ -74,7 +74,7 @@ class TransactionPaymentController extends Controller
             if ($transaction->payment_status != 'paid') {
                 $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
                     'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
-                    'cheque_number', 'bank_account_number', ]);
+                    'cheque_number', 'bank_account_number', 'gift_card_number', ]);
                 $inputs['paid_on'] = $this->transactionUtil->uf_date($request->input('paid_on'), true);
                 $inputs['transaction_id'] = $transaction->id;
                 $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
@@ -87,7 +87,17 @@ class TransactionPaymentController extends Controller
                     $inputs['transaction_no'] = $request->input('transaction_no_2');
                 } elseif ($inputs['method'] == 'custom_pay_3') {
                     $inputs['transaction_no'] = $request->input('transaction_no_3');
+                } elseif ($inputs['method'] == 'gift_card') {
+                    if (! in_array($transaction->type, ['sell', 'sell_return'])) {
+                        throw new \Exception(__('messages.something_went_wrong'));
+                    }
+                    $gift_card = $this->transactionUtil->getValidGiftCardForPayment($business_id, $request->input('gift_card_number'));
+                    $inputs['gift_card_id'] = $gift_card->id;
+                    $inputs['transaction_no'] = $gift_card->card_number;
+                } else {
+                    $inputs['gift_card_id'] = null;
                 }
+                unset($inputs['gift_card_number']);
 
                 if (! empty($request->input('account_id')) && $inputs['method'] != 'advance') {
                     $inputs['account_id'] = $request->input('account_id');
@@ -101,6 +111,7 @@ class TransactionPaymentController extends Controller
                 }
 
                 DB::beginTransaction();
+                $old_gift_card_usage = $this->transactionUtil->getGiftCardUsageMapForTransaction($transaction->id);
 
                 $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
                 //Generate reference number
@@ -130,6 +141,7 @@ class TransactionPaymentController extends Controller
                 //update payment status
                 $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
                 $transaction->payment_status = $payment_status;
+                $this->transactionUtil->syncGiftCardUsageForTransaction($transaction, $old_gift_card_usage, auth()->user()->id);
 
                 $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
 
@@ -240,7 +252,7 @@ class TransactionPaymentController extends Controller
 
             $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
                 'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
-                'cheque_number', 'bank_account_number', ]);
+                'cheque_number', 'bank_account_number', 'gift_card_number', ]);
             $inputs['paid_on'] = $this->transactionUtil->uf_date($request->input('paid_on'), true);
             $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
 
@@ -250,7 +262,19 @@ class TransactionPaymentController extends Controller
                 $inputs['transaction_no'] = $request->input('transaction_no_2');
             } elseif ($inputs['method'] == 'custom_pay_3') {
                 $inputs['transaction_no'] = $request->input('transaction_no_3');
+            } elseif ($inputs['method'] == 'gift_card') {
+                $transaction = Transaction::where('business_id', $business_id)
+                    ->find($payment->transaction_id);
+                if (empty($transaction) || ! in_array($transaction->type, ['sell', 'sell_return'])) {
+                    throw new \Exception(__('messages.something_went_wrong'));
+                }
+                $gift_card = $this->transactionUtil->getValidGiftCardForPayment($business_id, $request->input('gift_card_number'));
+                $inputs['gift_card_id'] = $gift_card->id;
+                $inputs['transaction_no'] = $gift_card->card_number;
+            } else {
+                $inputs['gift_card_id'] = null;
             }
+            unset($inputs['gift_card_number']);
 
             if (! empty($request->input('account_id'))) {
                 $inputs['account_id'] = $request->input('account_id');
@@ -282,12 +306,14 @@ class TransactionPaymentController extends Controller
             }
 
             DB::beginTransaction();
+            $old_gift_card_usage = $this->transactionUtil->getGiftCardUsageMapForTransaction($transaction->id);
 
             $payment->update($inputs);
 
             //update payment status
             $payment_status = $this->transactionUtil->updatePaymentStatus($payment->transaction_id);
             $transaction->payment_status = $payment_status;
+            $this->transactionUtil->syncGiftCardUsageForTransaction($transaction, $old_gift_card_usage, auth()->user()->id);
 
             $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
 
@@ -326,6 +352,14 @@ class TransactionPaymentController extends Controller
         if (request()->ajax()) {
             try {
                 $payment = TransactionPayment::findOrFail($id);
+                $old_gift_card_usage = [];
+                $transaction = null;
+                if (! empty($payment->transaction_id)) {
+                    $transaction = Transaction::find($payment->transaction_id);
+                    if (! empty($transaction)) {
+                        $old_gift_card_usage = $this->transactionUtil->getGiftCardUsageMapForTransaction($transaction->id);
+                    }
+                }
 
                 DB::beginTransaction();
 
@@ -353,6 +387,10 @@ class TransactionPaymentController extends Controller
 
                     //Delete advance payment
                     TransactionPayment::deletePayment($payment);
+                }
+
+                if (! empty($transaction)) {
+                    $this->transactionUtil->syncGiftCardUsageForTransaction($transaction, $old_gift_card_usage, auth()->user()->id);
                 }
 
                 DB::commit();

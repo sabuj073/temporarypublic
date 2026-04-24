@@ -1,12 +1,4 @@
 <style id="vp-users-vendo-styles">
-    body.vp-users-vendo-page aside.side-bar.vp-custom-sidebar {
-        display: none !important;
-    }
-
-    body.vp-users-vendo-page .vp-side-btn {
-        display: none !important;
-    }
-
     body.vp-users-vendo-page #scrollable-container {
         padding-bottom: 28px;
     }
@@ -69,7 +61,7 @@
         border-radius: 16px;
         border: 1px solid rgba(15, 23, 42, 0.06);
         box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
-        overflow: hidden;
+        overflow: visible;
     }
 
     body.vp-users-vendo-page .vp-users-card-toolbar {
@@ -164,6 +156,8 @@
 
     body.vp-users-vendo-page .vp-users-table-wrap {
         padding: 0 4px 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     body.vp-users-vendo-page .vp-users-table-wrap .dataTables_processing {

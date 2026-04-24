@@ -96,5 +96,34 @@
         </div>
     </div>
 
+    <div class="col-sm-6">
+        <div class="form-group">
+            <div class="checkbox">
+                <label>
+                {!! Form::checkbox('common_settings[enable_auto_restock]', 1, !empty($common_settings['enable_auto_restock']) , [ 'class' => 'input-icheck', 'id' => 'enable_auto_restock']); !!} {{ __( 'lang_v1.enable_auto_restock' ) }}
+                </label>
+              @show_tooltip(__('lang_v1.auto_restock_help_text'))
+            </div>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="col-sm-6">
+        <div class="form-group">
+            {!! Form::label('common_settings[auto_restock_target_factor]', __('lang_v1.auto_restock_target_factor') . ':') !!}
+            {!! Form::number('common_settings[auto_restock_target_factor]', !empty($common_settings['auto_restock_target_factor']) ? $common_settings['auto_restock_target_factor'] : 1, ['class' => 'form-control', 'step' => '0.1', 'min' => '1']); !!}
+            <p class="help-block">{{ __('lang_v1.auto_restock_target_factor_help') }}</p>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div class="form-group">
+            {!! Form::label('common_settings[auto_restock_delivery_days]', __('lang_v1.auto_restock_delivery_days') . ':') !!}
+            {!! Form::number('common_settings[auto_restock_delivery_days]', !empty($common_settings['auto_restock_delivery_days']) ? $common_settings['auto_restock_delivery_days'] : 0, ['class' => 'form-control', 'min' => '0']); !!}
+            <p class="help-block">{{ __('lang_v1.auto_restock_delivery_days_help') }}</p>
+        </div>
+    </div>
+
     </div>
 </div>

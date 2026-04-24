@@ -50,6 +50,7 @@ use App\Utils\CashRegisterUtil;
 use App\Utils\ContactUtil;
 use App\Utils\ModuleUtil;
 use App\Utils\NotificationUtil;
+use App\Utils\PromotionUtil;
 use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
 use App\Variation;
@@ -83,6 +84,8 @@ class SellPosController extends Controller
 
     protected $notificationUtil;
 
+    protected $promotionUtil;
+
     /**
      * Constructor
      *
@@ -96,7 +99,8 @@ class SellPosController extends Controller
         TransactionUtil $transactionUtil,
         CashRegisterUtil $cashRegisterUtil,
         ModuleUtil $moduleUtil,
-        NotificationUtil $notificationUtil
+        NotificationUtil $notificationUtil,
+        PromotionUtil $promotionUtil
     ) {
         $this->contactUtil = $contactUtil;
         $this->productUtil = $productUtil;
@@ -105,9 +109,10 @@ class SellPosController extends Controller
         $this->cashRegisterUtil = $cashRegisterUtil;
         $this->moduleUtil = $moduleUtil;
         $this->notificationUtil = $notificationUtil;
+        $this->promotionUtil = $promotionUtil;
 
         $this->dummyPaymentLine = ['method' => 'cash', 'amount' => 0, 'note' => '', 'card_transaction_number' => '', 'card_number' => '', 'card_type' => '', 'card_holder_name' => '', 'card_month' => '', 'card_year' => '', 'card_security' => '', 'cheque_number' => '', 'bank_account_number' => '',
-            'is_return' => 0, 'transaction_no' => ''];
+            'is_return' => 0, 'transaction_no' => '', 'gift_card_number' => ''];
     }
 
     /**
@@ -421,7 +426,16 @@ class SellPosController extends Controller
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],
                 ];
-                $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+                $promotion_summary = $this->promotionUtil->evaluatePromotions(
+                    $business_id,
+                    $input['products'],
+                    $request->get('contact_id'),
+                    $request->input('promotion_code')
+                );
+                $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount, true, $promotion_summary['discount_amount']);
+                $input['promotion_code'] = $promotion_summary['promotion_code'] ?? $request->input('promotion_code');
+                $input['promotion_discount_amount'] = $promotion_summary['discount_amount'];
+                $input['promotion_meta'] = json_encode($promotion_summary['matched_promotions']);
 
                 DB::beginTransaction();
 
@@ -530,6 +544,9 @@ class SellPosController extends Controller
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
+                if ($input['status'] == 'final' && ! empty($promotion_summary['matched_promotions'])) {
+                    $this->promotionUtil->recordPromotionUsage($transaction, $promotion_summary, $contact_id, $user_id);
+                }
 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
@@ -612,7 +629,16 @@ class SellPosController extends Controller
 
                     if ($request->session()->get('business.enable_rp') == 1) {
                         $redeemed = !empty($input['rp_redeemed']) ? $input['rp_redeemed'] : 0;
-                        $this->transactionUtil->updateCustomerRewardPoints($contact_id, $transaction->rp_earned, 0, $redeemed);
+                        $this->transactionUtil->updateCustomerRewardPoints(
+                            $contact_id,
+                            $transaction->rp_earned,
+                            0,
+                            $redeemed,
+                            0,
+                            $transaction->final_total,
+                            $transaction->id,
+                            $user_id
+                        );
                     }
 
                     //Allocate the quantity from purchase and add mapping of
@@ -1287,7 +1313,16 @@ class SellPosController extends Controller
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],
                 ];
-                $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+                $promotion_summary = $this->promotionUtil->evaluatePromotions(
+                    $business_id,
+                    $input['products'],
+                    $request->get('contact_id'),
+                    $request->input('promotion_code')
+                );
+                $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount, true, $promotion_summary['discount_amount']);
+                $input['promotion_code'] = $promotion_summary['promotion_code'] ?? $request->input('promotion_code');
+                $input['promotion_discount_amount'] = $promotion_summary['discount_amount'];
+                $input['promotion_meta'] = json_encode($promotion_summary['matched_promotions']);
 
                 if (!empty($request->input('transaction_date'))) {
                     $input['transaction_date'] = $this->productUtil->uf_date($request->input('transaction_date'), true);
@@ -1401,6 +1436,10 @@ class SellPosController extends Controller
                 DB::beginTransaction();
 
                 $transaction = $this->transactionUtil->updateSellTransaction($id, $business_id, $input, $invoice_total, $user_id);
+                \App\PromotionUsage::where('transaction_id', $transaction->id)->delete();
+                if ($transaction->status == 'final' && ! empty($promotion_summary['matched_promotions'])) {
+                    $this->promotionUtil->recordPromotionUsage($transaction, $promotion_summary, $contact_id, $user_id);
+                }
 
                 //update service staff timer
                 if (!$is_direct_sale && $transaction->status == 'final') {
@@ -1479,7 +1518,17 @@ class SellPosController extends Controller
                 }
 
                 if ($request->session()->get('business.enable_rp') == 1) {
-                    $this->transactionUtil->updateCustomerRewardPoints($contact_id, $transaction->rp_earned, $rp_earned_before, $transaction->rp_redeemed, $rp_redeemed_before);
+                    $lifetime_sale_delta = $transaction->final_total - $transaction_before->final_total;
+                    $this->transactionUtil->updateCustomerRewardPoints(
+                        $contact_id,
+                        $transaction->rp_earned,
+                        $rp_earned_before,
+                        $transaction->rp_redeemed,
+                        $rp_redeemed_before,
+                        $lifetime_sale_delta,
+                        $transaction->id,
+                        $user_id
+                    );
                 }
 
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
@@ -2374,6 +2423,9 @@ class SellPosController extends Controller
         $customer_id = $request->input('customer_id');
 
         $redeem_details = $this->transactionUtil->getRewardRedeemDetails($business_id, $customer_id);
+        $contact = Contact::where('business_id', $business_id)->with(['loyalty_tier'])->find($customer_id);
+        $redeem_details['customer_total_rp'] = ! empty($contact) ? ($contact->total_rp ?? 0) : 0;
+        $redeem_details['loyalty_tier'] = ! empty($contact) && ! empty($contact->loyalty_tier) ? $contact->loyalty_tier->name : null;
 
         return json_encode($redeem_details);
     }

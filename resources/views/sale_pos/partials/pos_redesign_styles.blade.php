@@ -128,11 +128,11 @@
             min-height: 0;
         }
 
-        /* Desktop: left panel max 60% width; cart fills the rest. */
-        @media (min-width: 1200px) {
+        /* Desktop + tablet landscape: same two-pane layout as wide screens (Tailwind lg starts at 1024). */
+        @media (min-width: 992px) {
             body.vp-pos-page .vp-pos-main-row {
-                display: flex;
-                flex-direction: row;
+                display: flex !important;
+                flex-direction: row !important;
                 align-items: stretch;
                 flex-wrap: nowrap;
                 max-height: 100%;
@@ -620,11 +620,6 @@
             color: #334155 !important;
         }
 
-        body.vp-pos-page .pos-form-actions #pos-finalize {
-            background: #1e3a8a !important;
-            border-radius: 12px !important;
-        }
-
         body.vp-pos-page .pos-form-actions .pos-express-finalize[data-pay_method="cash"] {
             background: #16a34a !important;
             border-radius: 12px !important;
@@ -1058,7 +1053,6 @@
         body.vp-pos-page .pos-form-actions > .tw-flex > div:nth-child(1),
         body.vp-pos-page .pos-form-actions > .tw-flex > div:nth-child(2),
         body.vp-pos-page .pos-form-actions > .tw-flex > div:nth-child(4),
-        body.vp-pos-page .pos-form-actions #pos-finalize,
         body.vp-pos-page .pos-form-actions .pos-total {
             display: none !important;
         }
@@ -1110,7 +1104,7 @@
         }
 
         body.vp-pos-page .pos-form-actions #pos-cancel {
-            grid-column: span 4;
+            grid-column: span 3;
             background: #ffe4e6 !important;
             color: #ef4444 !important;
             border: 1px solid #fecdd3 !important;
@@ -1122,14 +1116,32 @@
         }
 
         body.vp-pos-page .pos-form-actions .pos-express-finalize[data-pay_method="card"] {
-            grid-column: span 4;
+            grid-column: span 3;
             background: #2580ff !important;
             color: #fff !important;
             border: 0 !important;
         }
 
+        body.vp-pos-page .pos-form-actions #pos-finalize {
+            grid-column: span 3;
+            background: #1e40af !important;
+            color: #fff !important;
+            border: 0 !important;
+            display: inline-flex !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            height: 36px;
+            border-radius: 8px !important;
+            flex-direction: row !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 6px !important;
+            font-size: 9px !important;
+            font-weight: 700 !important;
+        }
+
         body.vp-pos-page .pos-form-actions .pos-express-finalize[data-pay_method="cash"] {
-            grid-column: span 4;
+            grid-column: span 3;
             background: #2ea936 !important;
             color: #fff !important;
             border: 0 !important;
@@ -1162,5 +1174,107 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 flex: 0 0 100% !important;
+            }
+
+            /*
+             * Stacked tablet/phone (e.g. 768px): cart is full width but line table is still wide —
+             * compact type + optional horizontal scroll so columns never crush each other.
+             */
+            body.vp-pos-page .pos_product_div {
+                max-width: 100%;
+                min-width: 0;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            body.vp-pos-page .vp-pos-cart-shell #pos_table {
+                margin-bottom: 8px;
+            }
+
+            body.vp-pos-page .vp-pos-cart-shell #pos_table thead th {
+                font-size: 9px !important;
+                padding: 7px 4px !important;
+                line-height: 1.15 !important;
+            }
+
+            body.vp-pos-page .vp-pos-cart-shell #pos_table tbody td {
+                font-size: 10px !important;
+                padding: 7px 4px !important;
+            }
+
+            body.vp-pos-page #pos_table td.vp-pos-col-product {
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+            }
+
+            body.vp-pos-page #pos_table td.vp-pos-col-price .pos_unit_price_inc_tax,
+            body.vp-pos-page #pos_table td.vp-pos-col-subtotal .pos_line_total,
+            body.vp-pos-page #pos_table td.vp-pos-col-subtotal .pos_line_total_text {
+                font-size: 10px !important;
+                height: 24px !important;
+                padding: 2px 4px !important;
+            }
+
+            body.vp-pos-page #pos_table td.vp-pos-col-qty .input-number .form-control {
+                font-size: 10px !important;
+                height: 26px !important;
+                padding: 2px 3px !important;
+            }
+
+            body.vp-pos-page #pos_table td.vp-pos-col-qty .input-number .btn {
+                flex: 0 0 24px !important;
+                width: 24px !important;
+                min-width: 24px !important;
+                height: 24px !important;
+            }
+
+            body.vp-pos-page #pos_table td.vp-pos-col-qty .input-number .btn i {
+                font-size: 10px !important;
+            }
+
+            body.vp-pos-page #pos_table .vp-pos-line-remove {
+                font-size: 12px !important;
+                padding: 4px 6px !important;
+            }
+
+            body.vp-pos-page .vp-pos-cart-tab {
+                font-size: 12px !important;
+                padding: 9px 8px !important;
+            }
+
+            body.vp-pos-page .pos-form-actions > .tw-flex > div:nth-child(3) {
+                gap: 6px !important;
+            }
+
+            body.vp-pos-page .pos-form-actions > .tw-flex > div:nth-child(3) button {
+                font-size: 8px !important;
+                height: 34px !important;
+            }
+
+            body.vp-pos-page .vp-pos-browse-shell .product_box {
+                min-height: 104px;
+                padding: 0 40px 0 0;
+            }
+
+            body.vp-pos-page .vp-pos-browse-shell .product_box .image-container {
+                flex: 0 0 92px;
+                width: 92px;
+                min-width: 92px;
+            }
+
+            body.vp-pos-page .vp-pos-browse-shell .product_box::after {
+                width: 28px;
+                height: 28px;
+                right: 10px;
+                bottom: 10px;
+                font-size: 18px;
+            }
+
+            body.vp-pos-page .vp-pos-browse-shell .vp-pos-product-title {
+                font-size: 11px !important;
+            }
+
+            body.vp-pos-page .vp-pos-browse-shell .vp-pos-product-price {
+                font-size: 12px !important;
             }
         }
